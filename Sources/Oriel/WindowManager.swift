@@ -10,11 +10,12 @@ final class WindowManager {
        because AXUIElement is not Hashable in Swift.
 
        restoreFrame is the frame the window had before Oriel first touched
-       it; lastAppliedFrame is what Oriel set most recently. Chained actions
-       (left half → right half → maximize) keep the original restoreFrame as
-       long as the user hasn't rearranged the window in between, so Restore
-       always returns to the user's own arrangement, not an intermediate
-       Oriel-set one. */
+       it; lastAppliedFrame is the frame the window actually ended up with
+       after Oriel's last action (read back, since apps can refuse or clamp
+       the requested frame). Chained actions (left half → right half →
+       maximize) keep the original restoreFrame as long as the user hasn't
+       rearranged the window in between, so Restore always returns to the
+       user's own arrangement, not an intermediate Oriel-set one. */
     private struct History {
         let window: AccessibilityWindow
         var restoreFrame: CGRect
@@ -85,25 +86,48 @@ final class WindowManager {
             }
         apply(
             CGRect(origin: origin, size: CGSize(width: width, height: screen.height)),
-            to: window, currentFrame: frame)
+            to: window, currentFrame: frame,
+            /* A window that refuses the half width would otherwise be left
+               hanging at the target origin — mid-screen for the right half —
+               so re-anchor it to the edge the action aimed for. */
+            alignTrailing: half == .right)
     }
 
     // MARK: History
 
-    private func apply(_ target: CGRect, to window: AccessibilityWindow, currentFrame: CGRect) {
+    private func apply(
+        _ target: CGRect, to window: AccessibilityWindow, currentFrame: CGRect,
+        alignTrailing: Bool = false
+    ) {
+        window.setFrame(target)
+
+        /* Read back what the window actually accepted — apps refuse or clamp
+           frames (fixed sizes, minimums, character-grid increments). */
+        var applied = window.frame ?? target
+        if alignTrailing, abs(applied.width - target.width) > 1 {
+            let corrected = CGRect(
+                origin: CGPoint(x: target.maxX - applied.width, y: applied.minY),
+                size: applied.size)
+            window.setFrame(corrected)
+            applied = window.frame ?? corrected
+        }
+
+        /* Track the applied (not requested) frame: comparing the next
+           action's current frame against a frame the window never actually
+           had would look like a user rearrangement and wrongly reset the
+           restore point. */
         if let index = histories.firstIndex(where: { $0.window.isSameWindow(as: window) }) {
             if !isApproximately(currentFrame, histories[index].lastAppliedFrame) {
                 /* The user rearranged the window since our last action;
                    that arrangement becomes the new restore point. */
                 histories[index].restoreFrame = currentFrame
             }
-            histories[index].lastAppliedFrame = target
+            histories[index].lastAppliedFrame = applied
         } else {
             histories.append(
-                History(window: window, restoreFrame: currentFrame, lastAppliedFrame: target))
+                History(window: window, restoreFrame: currentFrame, lastAppliedFrame: applied))
             if histories.count > 32 { histories.removeFirst() }
         }
-        window.setFrame(target)
     }
 
     /* Some apps refuse the exact requested frame by a few points (size
