@@ -20,13 +20,16 @@ let package = Package(
             ],
             path: "Sources/Oriel",
             linkerSettings: [
-                /* Sparkle.framework is embedded at Contents/Frameworks by
-                   Scripts/bundle.sh; the binary needs the matching rpath.
-                   (`swift run` still works: SPM adds the build dir to the
-                   rpath list itself.) */
+                /* Two rpaths for the two places Sparkle.framework lives:
+                   ../Frameworks for the bundled app (Scripts/bundle.sh embeds
+                   it at Contents/Frameworks), and the executable's own dir
+                   for `swift run` — Xcode 26's build system stages the
+                   framework next to the binary but writes no rpath for it. */
                 .unsafeFlags([
                     "-Xlinker", "-rpath",
                     "-Xlinker", "@executable_path/../Frameworks",
+                    "-Xlinker", "-rpath",
+                    "-Xlinker", "@executable_path",
                 ])
             ]
         ),
