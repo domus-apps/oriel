@@ -34,6 +34,22 @@ struct AccessibilityWindow {
         setSize(rect.size)
     }
 
+    /* Like setFrame, but anchors the trailing (right) edge at rect.maxX:
+       the size goes in first and the position is computed from the size the
+       window actually accepted, so a refused resize never flashes the window
+       at the rect's leading origin before being re-anchored. */
+    func setFrameAnchoredTrailing(_ rect: CGRect) {
+        setSize(rect.size)
+        let width = frame?.width ?? rect.width
+        setPosition(CGPoint(x: rect.maxX - width, y: rect.minY))
+        setSize(rect.size)
+        /* Rarely, the final size pass lands a different width than the one
+           the position was computed from — re-anchor if so. */
+        if let final = frame?.width, abs(final - width) > 1 {
+            setPosition(CGPoint(x: rect.maxX - final, y: rect.minY))
+        }
+    }
+
     func isSameWindow(as other: AccessibilityWindow) -> Bool {
         CFEqual(element, other.element)
     }

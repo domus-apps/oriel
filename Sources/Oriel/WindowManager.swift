@@ -99,18 +99,15 @@ final class WindowManager {
         _ target: CGRect, to window: AccessibilityWindow, currentFrame: CGRect,
         alignTrailing: Bool = false
     ) {
-        window.setFrame(target)
+        if alignTrailing {
+            window.setFrameAnchoredTrailing(target)
+        } else {
+            window.setFrame(target)
+        }
 
         /* Read back what the window actually accepted — apps refuse or clamp
            frames (fixed sizes, minimums, character-grid increments). */
-        var applied = window.frame ?? target
-        if alignTrailing, abs(applied.width - target.width) > 1 {
-            let corrected = CGRect(
-                origin: CGPoint(x: target.maxX - applied.width, y: applied.minY),
-                size: applied.size)
-            window.setFrame(corrected)
-            applied = window.frame ?? corrected
-        }
+        let applied = window.frame ?? target
 
         /* Track the applied (not requested) frame: comparing the next
            action's current frame against a frame the window never actually
