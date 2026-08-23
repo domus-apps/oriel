@@ -188,7 +188,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func openSettings() {
         if settingsWindowController == nil {
-            settingsWindowController = SettingsWindowController(store: shortcutStore)
+            settingsWindowController = SettingsWindowController(
+                store: shortcutStore, updater: updater)
             if let window = settingsWindowController?.window {
                 NotificationCenter.default.addObserver(
                     forName: NSWindow.willCloseNotification, object: window, queue: .main
