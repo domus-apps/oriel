@@ -76,7 +76,12 @@ The release workflow signs and notarizes automatically when these repository sec
 The app updates itself via [Sparkle](https://sparkle-project.org): it checks the feed at
 `appcast.xml` on `main` (see `SUFeedURL` in `Scripts/Info.plist`). After publishing a release,
 the workflow signs the notarized zip with the Sparkle private key and commits a new appcast
-entry — no manual steps. The EdDSA keypair lives in the maintainer's login keychain (back it
+entry — no manual steps.
+
+Release notes come from `CHANGELOG.md`: write a `## <version>` section before tagging (the
+release fails early without one). The workflow publishes that section as the GitHub release
+body and embeds it (rendered to HTML) in the appcast entry, so the update dialog shows the
+same notes. The EdDSA keypair lives in the maintainer's login keychain (back it
 up; losing it means existing installs can't verify future updates).
 
 Sparkle is Developer-ID-distribution only — a future App Store variant must compile out
