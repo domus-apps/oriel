@@ -397,42 +397,43 @@ func drawSocialPreview(_ cg: CGContext, icon: CGImage) {
         text.draw(at: NSPoint(x: canvas.midX - text.size().width / 2, y: y))
     }
 
-    // Centered stack: icon, wordmark, tagline, shortcut keycaps
-    cg.draw(icon, in: CGRect(x: canvas.midX - 110, y: 350, width: 220, height: 220))
+    // Centered stack: icon, wordmark, tagline, shortcut keycaps — sized up
+    // so the card stays legible at the small sizes link previews render at.
+    cg.draw(icon, in: CGRect(x: canvas.midX - 125, y: 355, width: 250, height: 250))
 
     drawCentered(
         NSAttributedString(string: "Oriel", attributes: [
-            .font: NSFont.systemFont(ofSize: 88, weight: .bold),
+            .font: NSFont.systemFont(ofSize: 100, weight: .bold),
             .foregroundColor: NSColor.white,
-        ]), y: 230)
+        ]), y: 238)
 
     drawCentered(
         NSAttributedString(string: "Keyboard-driven window management for macOS", attributes: [
-            .font: NSFont.systemFont(ofSize: 32, weight: .medium),
+            .font: NSFont.systemFont(ofSize: 38, weight: .medium),
             .foregroundColor: NSColor(srgbRed: 0.62, green: 0.71, blue: 0.88, alpha: 1),
-        ]), y: 172)
+        ]), y: 176)
 
     let keys = ["⌃⌥↩", "⌃⌥←", "⌃⌥→", "⌃⌥⌫"]
     let labels = keys.map {
         NSAttributedString(string: $0, attributes: [
-            .font: NSFont.systemFont(ofSize: 26, weight: .semibold),
+            .font: NSFont.systemFont(ofSize: 30, weight: .semibold),
             .foregroundColor: NSColor(srgbRed: 0.78, green: 0.85, blue: 0.97, alpha: 1),
         ])
     }
     let gap: CGFloat = 16
-    let widths = labels.map { $0.size().width + 36 }
+    let widths = labels.map { $0.size().width + 44 }
     var x = canvas.midX - (widths.reduce(0, +) + gap * CGFloat(labels.count - 1)) / 2
     for (label, width) in zip(labels, widths) {
-        let pill = CGRect(x: x, y: 78, width: width, height: 56)
-        cg.addPath(CGPath(roundedRect: pill, cornerWidth: 14, cornerHeight: 14, transform: nil))
+        let pill = CGRect(x: x, y: 82, width: width, height: 62)
+        cg.addPath(CGPath(roundedRect: pill, cornerWidth: 16, cornerHeight: 16, transform: nil))
         cg.setFillColor(color(0xFFFFFF, 0.07))
         cg.fillPath()
-        cg.addPath(CGPath(roundedRect: pill.insetBy(dx: 1, dy: 1), cornerWidth: 13, cornerHeight: 13, transform: nil))
+        cg.addPath(CGPath(roundedRect: pill.insetBy(dx: 1, dy: 1), cornerWidth: 15, cornerHeight: 15, transform: nil))
         cg.setStrokeColor(color(0xFFFFFF, 0.14))
         cg.setLineWidth(2)
         cg.strokePath()
         label.draw(at: NSPoint(
-            x: pill.minX + 18, y: pill.minY + (pill.height - label.size().height) / 2))
+            x: pill.minX + 22, y: pill.minY + (pill.height - label.size().height) / 2))
         x = pill.maxX + gap
     }
 }
@@ -467,10 +468,9 @@ let banner = makeBitmap(1800, 600)
 withContext(banner) { drawBanner($0, icon: bannerIcon) }
 savePNG(banner, "Assets/banner.png")
 
-// GitHub social preview: 2:1 aspect, rendered @2x for retina crispness.
-let og = makeBitmap(2560, 1280)
+// GitHub social preview: exactly 1280x640, GitHub's recommended size.
+let og = makeBitmap(1280, 640)
 withContext(og) { cg in
-    cg.scaleBy(x: 2, y: 2)
     drawSocialPreview(cg, icon: bannerIcon)
 }
 savePNG(og, "Assets/og-image.png")
