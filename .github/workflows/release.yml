@@ -17,6 +17,12 @@ jobs:
     # macOS 26 SDK — only the macos-26 image has it.
     runs-on: macos-26
 
+    # The secrets context isn't allowed in step-level `if:`, so expose
+    # presence flags here instead.
+    env:
+      HAVE_CERT: ${{ secrets.DEVELOPER_ID_P12 != '' }}
+      HAVE_NOTARY: ${{ secrets.NOTARY_KEY_P8 != '' }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -38,7 +44,7 @@ jobs:
       # Signing/notarization activates automatically once the secrets exist
       # (see README). Without them the build stays ad-hoc signed, as before.
       - name: Import Developer ID certificate
-        if: ${{ secrets.DEVELOPER_ID_P12 != '' }}
+        if: env.HAVE_CERT == 'true'
         env:
           DEVELOPER_ID_P12: ${{ secrets.DEVELOPER_ID_P12 }}
           DEVELOPER_ID_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
@@ -65,7 +71,7 @@ jobs:
           ditto -c -k --sequesterRsrc --keepParent build/Oriel.app Oriel.zip
 
       - name: Notarize and staple
-        if: ${{ secrets.NOTARY_KEY_P8 != '' }}
+        if: env.HAVE_NOTARY == 'true'
         env:
           NOTARY_KEY_P8: ${{ secrets.NOTARY_KEY_P8 }}
           NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
