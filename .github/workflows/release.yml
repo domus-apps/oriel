@@ -1,0 +1,70 @@
+name: Release
+
+# Publishes a GitHub Release with a zipped Oriel.app when a version tag is pushed:
+#   git tag v0.1.0 && git push origin v0.1.0
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    # The package targets macOS 26, so the build needs an Xcode that ships the
+    # macOS 26 SDK — only the macos-26 image has it.
+    runs-on: macos-26
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Run tests
+        run: ./Scripts/test.sh
+
+      - name: Stamp version from tag
+        if: github.ref_type == 'tag'
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" Scripts/Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $GITHUB_RUN_NUMBER" Scripts/Info.plist
+
+      - name: Build app bundle
+        run: ./Scripts/bundle.sh
+
+      - name: Zip app
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent build/Oriel.app Oriel.zip
+
+      - name: Create GitHub Release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          gh release create "$GITHUB_REF_NAME" "Oriel.zip#Oriel.app ($VERSION)" \
+            --title "Oriel $VERSION" \
+            --generate-notes \
+            --notes "$(cat <<'EOF'
+          > [!IMPORTANT]
+          > This build is ad-hoc signed (no Developer ID / notarization), so
+          > Gatekeeper will block the first launch. After unzipping, either
+          > right-click → Open, or run:
+          > `xattr -d com.apple.quarantine Oriel.app`
+          EOF
+          )"
+
+      # For manual (workflow_dispatch) runs, keep the app as a build artifact
+      # instead of publishing a release.
+      - name: Upload artifact
+        if: github.ref_type != 'tag'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Oriel.app
+          path: Oriel.zip
