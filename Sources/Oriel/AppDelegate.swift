@@ -8,6 +8,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var settingsWindowController: SettingsWindowController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        setUpMainMenu()
         ensureAccessibilityPermission()
         applyShortcuts()
         observeShortcutChanges()
@@ -30,6 +31,41 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             openSettings()
         }
         return false
+    }
+
+    /* An accessory app has no visible menu bar, but ⌘-key equivalents are
+       still dispatched through the main menu — without one, ⌘W/⌘Q do
+       nothing in the settings window. The menu also becomes visible for
+       real whenever the app temporarily joins the Dock (regular policy). */
+    private func setUpMainMenu() {
+        let appMenu = NSMenu()
+        let settingsItem = NSMenuItem(
+            title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
+        settingsItem.target = self
+        appMenu.addItem(settingsItem)
+        appMenu.addItem(.separator())
+        appMenu.addItem(
+            NSMenuItem(
+                title: "Quit Oriel",
+                action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+
+        let windowMenu = NSMenu(title: "Window")
+        windowMenu.addItem(
+            NSMenuItem(
+                title: "Close Window",
+                action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w"))
+        windowMenu.addItem(
+            NSMenuItem(
+                title: "Minimize",
+                action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m"))
+
+        let mainMenu = NSMenu()
+        for submenu in [appMenu, windowMenu] {
+            let item = NSMenuItem()
+            item.submenu = submenu
+            mainMenu.addItem(item)
+        }
+        NSApp.mainMenu = mainMenu
     }
 
     private func ensureAccessibilityPermission() {
@@ -62,6 +98,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         case .previousDisplay: windowManager.moveToAdjacentDisplay(step: -1)
         case .leftHalf: windowManager.moveToHalf(.left)
         case .rightHalf: windowManager.moveToHalf(.right)
+        case .restore: windowManager.restorePreviousFrame()
         }
     }
 
@@ -125,7 +162,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func setUpStatusItem() {
-        let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        /* A fixed length instead of squareLength: square items are as wide
+           as the menu bar is tall, which pads a ~18pt symbol with a lot of
+           dead space. 20pt hugs the icon while keeping its natural size. */
+        let item = NSStatusBar.system.statusItem(withLength: 20)
         item.button?.image = NSImage(
             systemSymbolName: "macwindow.on.rectangle",
             accessibilityDescription: "Oriel"

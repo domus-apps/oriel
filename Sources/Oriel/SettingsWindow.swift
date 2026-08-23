@@ -44,10 +44,16 @@ final class SettingsWindowController: NSWindowController {
         let window = NSWindow(contentViewController: splitViewController)
         window.styleMask = [.titled, .closable, .miniaturizable, .fullSizeContentView]
         /* A toolbar (even an empty one) is required for the full-height
-           sidebar look; unifiedCompact keeps its title bar at roughly
-           standard height instead of the tall unified variant. */
-        window.toolbarStyle = .unifiedCompact
-        window.toolbar = NSToolbar()
+           sidebar look. The tall unified style centers the traffic lights
+           in a roomier title bar (like Xcode's settings window) instead of
+           pinning them to the top-left corner. */
+        window.toolbarStyle = .unified
+        let toolbar = NSToolbar()
+        /* An empty toolbar defaults to .iconAndLabel, which inflates the
+           unified title bar to 66pt; .iconOnly gives the standard 52pt that
+           Xcode's settings window uses. */
+        toolbar.displayMode = .iconOnly
+        window.toolbar = toolbar
         window.isReleasedWhenClosed = false
         window.setContentSize(NSSize(width: 640, height: 380))
         window.center()
@@ -133,6 +139,11 @@ final class SettingsSidebarViewController: NSViewController, NSTableViewDataSour
     var onSelect: ((SettingsPane) -> Void)?
 
     private let tableView = NSTableView()
+    private let scrollView = NSScrollView()
+
+    /* Extra top inset below the safe area. Zero, like Xcode's settings
+       sidebar: the first row sits flush against the title bar boundary. */
+    private static let scrollEdgeFadeClearance: CGFloat = 0
 
     override func loadView() {
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("pane"))
@@ -144,11 +155,56 @@ final class SettingsSidebarViewController: NSViewController, NSTableViewDataSour
         tableView.dataSource = self
         tableView.delegate = self
 
-        let scrollView = NSScrollView()
         scrollView.documentView = tableView
         scrollView.hasVerticalScroller = false
         scrollView.drawsBackground = false
+        /* Managed manually in viewDidLayout: the automatic inset stops at
+           the safe area, which leaves the first row inside the fade. */
+        scrollView.automaticallyAdjustsContentInsets = false
         view = scrollView
+
+        scrollView.contentView.postsBoundsChangedNotifications = true
+        NotificationCenter.default.addObserver(
+            forName: NSView.boundsDidChangeNotification, object: scrollView.contentView,
+            queue: .main
+        ) { [weak self] _ in
+            self?.updateScrollEdgeFade()
+        }
+    }
+
+    /* The soft scroll-edge fade (macOS 26) is not scroll-aware: its gradient
+       backdrop hangs ~10pt below the title bar at all times, dimming a first
+       row that sits flush against the boundary even when nothing is scrolled
+       under the bar. Mirror Xcode's settings sidebar instead: fade only while
+       content is actually scrolled under. The pocket is a private AppKit view
+       (NSScrollPocket), so this is a defensive class-name lookup — if AppKit
+       renames it, the system's default behavior simply returns. */
+    private func updateScrollEdgeFade() {
+        let restTop = -scrollView.contentInsets.top
+        let atRest = scrollView.contentView.bounds.minY <= restTop + 0.5
+        for subview in scrollView.subviews
+        where String(describing: type(of: subview)) == "NSScrollPocket" {
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.35
+                context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                subview.animator().alphaValue = atRest ? 0 : 1
+            }
+        }
+    }
+
+    override func viewDidLayout() {
+        super.viewDidLayout()
+        /* The pocket can appear after the first layout pass, so re-evaluate
+           on every layout, not only when the inset changes. */
+        defer { updateScrollEdgeFade() }
+        let top = view.safeAreaInsets.top + Self.scrollEdgeFadeClearance
+        guard scrollView.contentInsets.top != top else { return }
+        let wasAtTop = scrollView.contentView.bounds.minY <= -scrollView.contentInsets.top
+        scrollView.contentInsets = NSEdgeInsets(top: top, left: 0, bottom: 0, right: 0)
+        if wasAtTop {
+            scrollView.contentView.scroll(to: NSPoint(x: 0, y: -top))
+            scrollView.reflectScrolledClipView(scrollView.contentView)
+        }
     }
 
     func select(_ pane: SettingsPane) {
@@ -288,6 +344,9 @@ final class ShortcutsPaneViewController: NSViewController {
         let grid = NSGridView()
         grid.rowSpacing = 10
         grid.columnSpacing = 16
+        /* Labels and buttons have different intrinsic heights; align their
+           text baselines (the standard look for label + control rows). */
+        grid.rowAlignment = .firstBaseline
 
         for action in ShortcutAction.allCases {
             let label = NSTextField(labelWithString: action.title)

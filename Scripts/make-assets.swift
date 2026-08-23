@@ -365,6 +365,78 @@ func drawBanner(_ cg: CGContext, icon: CGImage) {
     }
 }
 
+// MARK: - GitHub social preview (1280 x 640 design space, rendered @2x)
+
+func drawSocialPreview(_ cg: CGContext, icon: CGImage) {
+    let canvas = CGRect(x: 0, y: 0, width: 1280, height: 640)
+    // Full bleed — GitHub renders the preview edge to edge and rounds the
+    // corners itself, so transparent corners would show through as white.
+    linearGradient(
+        cg, in: CGPath(rect: canvas, transform: nil),
+        colors: [color(0x16244A), color(0x0A1128)],
+        from: CGPoint(x: canvas.midX, y: canvas.maxY), to: CGPoint(x: canvas.midX, y: canvas.minY)
+    )
+
+    // Faint decorative window outlines drifting off the corners
+    cg.saveGState()
+    cg.setStrokeColor(color(0xFFFFFF, 0.06))
+    cg.setLineWidth(2.5)
+    for (x, y, w, h) in [
+        (-90.0, 430.0, 300.0, 210.0), (60.0, 520.0, 260.0, 190.0),
+        (1030.0, -60.0, 320.0, 230.0), (1140.0, 90.0, 280.0, 200.0),
+    ] {
+        cg.addPath(CGPath(
+            roundedRect: CGRect(x: x, y: y, width: w, height: h),
+            cornerWidth: 22, cornerHeight: 22, transform: nil
+        ))
+        cg.strokePath()
+    }
+    cg.restoreGState()
+
+    func drawCentered(_ text: NSAttributedString, y: CGFloat) {
+        text.draw(at: NSPoint(x: canvas.midX - text.size().width / 2, y: y))
+    }
+
+    // Centered stack: icon, wordmark, tagline, shortcut keycaps
+    cg.draw(icon, in: CGRect(x: canvas.midX - 110, y: 350, width: 220, height: 220))
+
+    drawCentered(
+        NSAttributedString(string: "Oriel", attributes: [
+            .font: NSFont.systemFont(ofSize: 88, weight: .bold),
+            .foregroundColor: NSColor.white,
+        ]), y: 230)
+
+    drawCentered(
+        NSAttributedString(string: "Keyboard-driven window management for macOS", attributes: [
+            .font: NSFont.systemFont(ofSize: 32, weight: .medium),
+            .foregroundColor: NSColor(srgbRed: 0.62, green: 0.71, blue: 0.88, alpha: 1),
+        ]), y: 172)
+
+    let keys = ["⌃⌥↩", "⌃⌥←", "⌃⌥→", "⌃⌥⌫"]
+    let labels = keys.map {
+        NSAttributedString(string: $0, attributes: [
+            .font: NSFont.systemFont(ofSize: 26, weight: .semibold),
+            .foregroundColor: NSColor(srgbRed: 0.78, green: 0.85, blue: 0.97, alpha: 1),
+        ])
+    }
+    let gap: CGFloat = 16
+    let widths = labels.map { $0.size().width + 36 }
+    var x = canvas.midX - (widths.reduce(0, +) + gap * CGFloat(labels.count - 1)) / 2
+    for (label, width) in zip(labels, widths) {
+        let pill = CGRect(x: x, y: 78, width: width, height: 56)
+        cg.addPath(CGPath(roundedRect: pill, cornerWidth: 14, cornerHeight: 14, transform: nil))
+        cg.setFillColor(color(0xFFFFFF, 0.07))
+        cg.fillPath()
+        cg.addPath(CGPath(roundedRect: pill.insetBy(dx: 1, dy: 1), cornerWidth: 13, cornerHeight: 13, transform: nil))
+        cg.setStrokeColor(color(0xFFFFFF, 0.14))
+        cg.setLineWidth(2)
+        cg.strokePath()
+        label.draw(at: NSPoint(
+            x: pill.minX + 18, y: pill.minY + (pill.height - label.size().height) / 2))
+        x = pill.maxX + gap
+    }
+}
+
 // MARK: - Main
 
 let fm = FileManager.default
@@ -394,3 +466,11 @@ let bannerIcon = makeIcon(px: 728).cgImage!
 let banner = makeBitmap(1800, 600)
 withContext(banner) { drawBanner($0, icon: bannerIcon) }
 savePNG(banner, "Assets/banner.png")
+
+// GitHub social preview: 2:1 aspect, rendered @2x for retina crispness.
+let og = makeBitmap(2560, 1280)
+withContext(og) { cg in
+    cg.scaleBy(x: 2, y: 2)
+    drawSocialPreview(cg, icon: bannerIcon)
+}
+savePNG(og, "Assets/og-image.png")

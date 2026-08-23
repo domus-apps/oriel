@@ -5,10 +5,33 @@ final class WindowManager {
         case left, right
     }
 
-    /* Frames saved by toggleMaximize, matched by AX element identity
-       (CFEqual) so each window restores to its own previous frame. Kept as
-       an array because AXUIElement is not Hashable in Swift. */
-    private var savedFrames: [(window: AccessibilityWindow, frame: CGRect)] = []
+    /* Per-window restore state, matched by AX element identity (CFEqual) so
+       each window restores to its own previous frame. Kept as an array
+       because AXUIElement is not Hashable in Swift.
+
+       restoreFrame is the frame the window had before Oriel first touched
+       it; lastAppliedFrame is what Oriel set most recently. Chained actions
+       (left half → right half → maximize) keep the original restoreFrame as
+       long as the user hasn't rearranged the window in between, so Restore
+       always returns to the user's own arrangement, not an intermediate
+       Oriel-set one. */
+    private struct History {
+        let window: AccessibilityWindow
+        var restoreFrame: CGRect
+        var lastAppliedFrame: CGRect
+    }
+
+    private var histories: [History] = []
+
+    // MARK: Restore
+
+    func restorePreviousFrame() {
+        guard let window = AccessibilityWindow.focused() else { return }
+        guard let index = histories.firstIndex(where: { $0.window.isSameWindow(as: window) })
+        else { return }
+        let history = histories.remove(at: index)
+        window.setFrame(history.restoreFrame)
+    }
 
     // MARK: Maximize / restore
 
@@ -19,15 +42,11 @@ final class WindowManager {
         let screen = screens[ScreenMath.screenIndex(containing: frame, in: screens)]
 
         if isApproximately(frame, screen),
-            let savedIndex = savedFrames.firstIndex(where: { $0.window.isSameWindow(as: window) })
+            histories.contains(where: { $0.window.isSameWindow(as: window) })
         {
-            let saved = savedFrames.remove(at: savedIndex)
-            window.setFrame(saved.frame)
+            restorePreviousFrame()
         } else {
-            savedFrames.removeAll { $0.window.isSameWindow(as: window) }
-            savedFrames.append((window, frame))
-            if savedFrames.count > 32 { savedFrames.removeFirst() }
-            window.setFrame(screen)
+            apply(screen, to: window, currentFrame: frame)
         }
     }
 
@@ -47,7 +66,7 @@ final class WindowManager {
             from: screens[currentIndex],
             to: screens[targetIndex]
         )
-        window.setFrame(newFrame)
+        apply(newFrame, to: window, currentFrame: frame)
     }
 
     // MARK: Halves
@@ -64,11 +83,31 @@ final class WindowManager {
             case .left: CGPoint(x: screen.minX, y: screen.minY)
             case .right: CGPoint(x: screen.maxX - width, y: screen.minY)
             }
-        window.setFrame(CGRect(origin: origin, size: CGSize(width: width, height: screen.height)))
+        apply(
+            CGRect(origin: origin, size: CGSize(width: width, height: screen.height)),
+            to: window, currentFrame: frame)
+    }
+
+    // MARK: History
+
+    private func apply(_ target: CGRect, to window: AccessibilityWindow, currentFrame: CGRect) {
+        if let index = histories.firstIndex(where: { $0.window.isSameWindow(as: window) }) {
+            if !isApproximately(currentFrame, histories[index].lastAppliedFrame) {
+                /* The user rearranged the window since our last action;
+                   that arrangement becomes the new restore point. */
+                histories[index].restoreFrame = currentFrame
+            }
+            histories[index].lastAppliedFrame = target
+        } else {
+            histories.append(
+                History(window: window, restoreFrame: currentFrame, lastAppliedFrame: target))
+            if histories.count > 32 { histories.removeFirst() }
+        }
+        window.setFrame(target)
     }
 
     /* Some apps refuse the exact requested frame by a few points (size
-       constraints, integral rounding), so "already maximized" needs slack. */
+       constraints, integral rounding), so frame comparisons need slack. */
     private func isApproximately(_ a: CGRect, _ b: CGRect, tolerance: CGFloat = 8) -> Bool {
         abs(a.minX - b.minX) <= tolerance
             && abs(a.minY - b.minY) <= tolerance

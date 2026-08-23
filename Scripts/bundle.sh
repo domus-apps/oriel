@@ -26,9 +26,15 @@ cp "$ICONBUILD/Assets.car" "$APP/Contents/Resources/Assets.car"
 cp "$ICONBUILD/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 rm -rf "$ICONBUILD"
 
-# Ad-hoc signature: keeps the TCC (Accessibility) grant stable across rebuilds
-# on this machine. Replace with a Developer ID identity for distribution.
-codesign --force --sign - "$APP"
+# With CODESIGN_IDENTITY set (e.g. "Developer ID Application"), produce a
+# distributable, notarization-ready signature (hardened runtime + timestamp).
+# Otherwise fall back to ad-hoc, which keeps the TCC (Accessibility) grant
+# stable across rebuilds on this machine.
+if [[ -n "${CODESIGN_IDENTITY:-}" ]]; then
+    codesign --force --options runtime --timestamp --sign "$CODESIGN_IDENTITY" "$APP"
+else
+    codesign --force --sign - "$APP"
+fi
 
 echo "Built $APP"
 echo "Run:  open $APP"

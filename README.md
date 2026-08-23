@@ -57,6 +57,22 @@ The app icon is compiled from the Icon Composer document at `Assets/AppIcon.icon
 `swift Scripts/make-assets.swift`), so on macOS 26+ the system renders it live with the Liquid
 Glass treatment — including the dark, clear, and tinted variants.
 
+### Release signing & notarization
+
+The release workflow signs and notarizes automatically when these repository secrets exist
+(without them, releases fall back to ad-hoc signing):
+
+| Secret | Value |
+| --- | --- |
+| `DEVELOPER_ID_P12` | Developer ID Application certificate + private key, exported as `.p12` from Keychain Access, then base64-encoded (`base64 -i cert.p12`) |
+| `DEVELOPER_ID_P12_PASSWORD` | Password chosen when exporting the `.p12` |
+| `NOTARY_KEY_P8` | Contents of an App Store Connect API key (`.p8`, Developer role) |
+| `NOTARY_KEY_ID` | The API key's Key ID |
+| `NOTARY_ISSUER_ID` | The API key's Issuer ID |
+
+Local distributable builds work too: `CODESIGN_IDENTITY="Developer ID Application" ./Scripts/bundle.sh`
+signs with hardened runtime + timestamp instead of ad-hoc.
+
 ## Development
 
 ```sh

@@ -55,6 +55,7 @@ enum ShortcutAction: String, CaseIterable {
     case previousDisplay
     case leftHalf
     case rightHalf
+    case restore
 
     var title: String {
         switch self {
@@ -63,6 +64,7 @@ enum ShortcutAction: String, CaseIterable {
         case .previousDisplay: "Previous Display"
         case .leftHalf: "Left Half"
         case .rightHalf: "Right Half"
+        case .restore: "Restore Previous Position"
         }
     }
 
@@ -85,6 +87,9 @@ enum ShortcutAction: String, CaseIterable {
         case .rightHalf:
             return ShortcutSpec(
                 keyCode: UInt32(kVK_RightArrow), carbonModifiers: ctrlOpt, keyLabel: "→")
+        case .restore:
+            return ShortcutSpec(
+                keyCode: UInt32(kVK_Delete), carbonModifiers: ctrlOpt, keyLabel: "⌫")
         }
     }
 }
