@@ -15,7 +15,13 @@ final class WindowManager {
        the requested frame). Chained actions (left half → right half →
        maximize) keep the original restoreFrame as long as the user hasn't
        rearranged the window in between, so Restore always returns to the
-       user's own arrangement, not an intermediate Oriel-set one. */
+       user's own arrangement, not an intermediate Oriel-set one.
+
+       Display moves are deliberately not part of that chain: they start a
+       new one, with the landing spot on the target display as the restore
+       point — restoring after "next display → right half" should return to
+       where the window landed on that display, not yank it back across
+       displays. */
     private struct History {
         let window: AccessibilityWindow
         var restoreFrame: CGRect
@@ -67,7 +73,7 @@ final class WindowManager {
             from: screens[currentIndex],
             to: screens[targetIndex]
         )
-        apply(newFrame, to: window, currentFrame: frame)
+        apply(newFrame, to: window, currentFrame: frame, resetsRestorePoint: true)
     }
 
     // MARK: Halves
@@ -97,7 +103,7 @@ final class WindowManager {
 
     private func apply(
         _ target: CGRect, to window: AccessibilityWindow, currentFrame: CGRect,
-        alignTrailing: Bool = false
+        alignTrailing: Bool = false, resetsRestorePoint: Bool = false
     ) {
         if alignTrailing {
             window.setFrameAnchoredTrailing(target)
@@ -113,16 +119,20 @@ final class WindowManager {
            action's current frame against a frame the window never actually
            had would look like a user rearrangement and wrongly reset the
            restore point. */
+        let restorePoint = resetsRestorePoint ? applied : currentFrame
         if let index = histories.firstIndex(where: { $0.window.isSameWindow(as: window) }) {
-            if !isApproximately(currentFrame, histories[index].lastAppliedFrame) {
-                /* The user rearranged the window since our last action;
-                   that arrangement becomes the new restore point. */
-                histories[index].restoreFrame = currentFrame
+            if resetsRestorePoint
+                || !isApproximately(currentFrame, histories[index].lastAppliedFrame)
+            {
+                /* Either this action starts a new chain (display move), or
+                   the user rearranged the window since our last action —
+                   both establish a new restore point. */
+                histories[index].restoreFrame = restorePoint
             }
             histories[index].lastAppliedFrame = applied
         } else {
             histories.append(
-                History(window: window, restoreFrame: currentFrame, lastAppliedFrame: applied))
+                History(window: window, restoreFrame: restorePoint, lastAppliedFrame: applied))
             if histories.count > 32 { histories.removeFirst() }
         }
     }
