@@ -17,5 +17,27 @@
         sparkle:edSignature="qWitSp7M921bIZJtKnY90ZQhnfggZ2vV9tAeoD3eU6l8tfybBMjOQlj47ZyoV+umacxrjY5HJW/9o9VzBX2KAQ==" length="2717431"
         type="application/octet-stream"/>
     </item>
+    <item>
+      <title>Oriel v1.1.0</title>
+      <link>https://github.com/domus-apps/oriel/releases/tag/v1.1.0</link>
+      <pubDate>Mon, 24 Aug 2026 13:16:33 +0000</pubDate>
+      <description><![CDATA[
+<h3>Fixed</h3>
+<ul>
+<li>Windows that refuse horizontal resizing (fixed-width windows) now snap flush to the display's right edge instead of stopping at mid-screen — and without flickering through an intermediate position.</li>
+<li>Restore now returns to the window's position from before the whole chain of snap/maximize actions, not just the most recent one, including for windows that clamp their size.</li>
+</ul>
+<h3>Changed</h3>
+<ul>
+<li>Moving a window to another display starts a new restore chain: pressing Restore afterwards returns the window to where it landed on that display instead of yanking it back across displays.</li>
+</ul>      ]]></description>
+      <sparkle:version>10</sparkle:version>
+      <sparkle:shortVersionString>1.1.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <enclosure
+        url="https://github.com/domus-apps/oriel/releases/download/v1.1.0/Oriel.zip"
+        sparkle:edSignature="FkCTpA0AMORpu/zcGTyp8z4q4XAEbTHM+T5T8vVFu5WO/lLP+7ysi2Umo2RO050lYyfYb6vjKiplQZ5DiEpkCg==" length="2718444"
+        type="application/octet-stream"/>
+    </item>
   </channel>
 </rss>
