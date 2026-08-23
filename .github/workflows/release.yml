@@ -22,6 +22,7 @@ jobs:
     env:
       HAVE_CERT: ${{ secrets.DEVELOPER_ID_P12 != '' }}
       HAVE_NOTARY: ${{ secrets.NOTARY_KEY_P8 != '' }}
+      HAVE_SPARKLE: ${{ secrets.SPARKLE_ED_PRIVATE_KEY != '' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -111,6 +112,32 @@ jobs:
             --title "Oriel $GITHUB_REF_NAME" \
             --generate-notes \
             --notes "$NOTES"
+
+      # Publish the update to existing installs: sign the stapled zip with the
+      # Sparkle EdDSA key and append it to the appcast on main. Runs after the
+      # release exists so the enclosure URL never 404s.
+      - name: Update appcast
+        if: github.ref_type == 'tag' && env.HAVE_SPARKLE == 'true'
+        env:
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          curl -sSfL -o "$RUNNER_TEMP/sparkle.tar.xz" \
+            "https://github.com/sparkle-project/Sparkle/releases/download/2.9.6/Sparkle-2.9.6.tar.xz"
+          mkdir -p "$RUNNER_TEMP/sparkle"
+          tar -xf "$RUNNER_TEMP/sparkle.tar.xz" -C "$RUNNER_TEMP/sparkle"
+          SIGNATURE=$(printf '%s' "$SPARKLE_ED_PRIVATE_KEY" \
+            | "$RUNNER_TEMP/sparkle/bin/sign_update" --ed-key-file - Oriel.zip)
+          # The checkout is detached at the tag; move to main (discarding the
+          # version-stamp edit) to commit the appcast entry.
+          git fetch origin main
+          git checkout -f -B main origin/main
+          ./Scripts/appcast-add.sh "$VERSION" "$GITHUB_RUN_NUMBER" "$SIGNATURE"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add appcast.xml
+          git commit -m "Publish v$VERSION to appcast"
+          git push origin main
 
       # For manual (workflow_dispatch) runs, keep the app as a build artifact
       # instead of publishing a release.

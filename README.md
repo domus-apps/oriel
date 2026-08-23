@@ -69,6 +69,18 @@ The release workflow signs and notarizes automatically when these repository sec
 | `NOTARY_KEY_P8` | Contents of an App Store Connect API key (`.p8`, Developer role) |
 | `NOTARY_KEY_ID` | The API key's Key ID |
 | `NOTARY_ISSUER_ID` | The API key's Issuer ID |
+| `SPARKLE_ED_PRIVATE_KEY` | Sparkle EdDSA private key (`generate_keys -x`) for signing auto-updates — must match `SUPublicEDKey` in `Scripts/Info.plist` |
+
+### Auto-updates (Sparkle)
+
+The app updates itself via [Sparkle](https://sparkle-project.org): it checks the feed at
+`appcast.xml` on `main` (see `SUFeedURL` in `Scripts/Info.plist`). After publishing a release,
+the workflow signs the notarized zip with the Sparkle private key and commits a new appcast
+entry — no manual steps. The EdDSA keypair lives in the maintainer's login keychain (back it
+up; losing it means existing installs can't verify future updates).
+
+Sparkle is Developer-ID-distribution only — a future App Store variant must compile out
+`UpdaterController.swift` and the Sparkle dependency (App Review 2.5.2 forbids self-updaters).
 
 Local distributable builds work too: `CODESIGN_IDENTITY="Developer ID Application" ./Scripts/bundle.sh`
 signs with hardened runtime + timestamp instead of ad-hoc.

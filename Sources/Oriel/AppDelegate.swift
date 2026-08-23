@@ -4,6 +4,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let windowManager = WindowManager()
     private let hotKeys = HotKeyCenter()
     private let shortcutStore = ShortcutStore()
+    private let updater = UpdaterController()
     private var statusItem: NSStatusItem?
     private var settingsWindowController: SettingsWindowController?
 
@@ -43,6 +44,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
         settingsItem.target = self
         appMenu.addItem(settingsItem)
+        appMenu.addItem(updater.makeMenuItem())
         appMenu.addItem(.separator())
         appMenu.addItem(
             NSMenuItem(
@@ -176,6 +178,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
         settingsItem.target = self
         menu.addItem(settingsItem)
+        menu.addItem(updater.makeMenuItem())
         menu.addItem(.separator())
         menu.addItem(
             NSMenuItem(title: "Quit Oriel", action: #selector(quit), keyEquivalent: "q"))
