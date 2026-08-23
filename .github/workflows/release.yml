@@ -108,7 +108,7 @@ jobs:
           )"
           fi
           gh release create "$GITHUB_REF_NAME" "Oriel.zip#Oriel.app ($VERSION)" \
-            --title "Oriel $VERSION" \
+            --title "Oriel $GITHUB_REF_NAME" \
             --generate-notes \
             --notes "$NOTES"
 
