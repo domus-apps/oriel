@@ -70,8 +70,9 @@ jobs:
         run: |
           ditto -c -k --sequesterRsrc --keepParent build/Oriel.app Oriel.zip
 
+      # Requires the cert too: an ad-hoc-signed submission is always rejected.
       - name: Notarize and staple
-        if: env.HAVE_NOTARY == 'true'
+        if: env.HAVE_CERT == 'true' && env.HAVE_NOTARY == 'true'
         env:
           NOTARY_KEY_P8: ${{ secrets.NOTARY_KEY_P8 }}
           NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
