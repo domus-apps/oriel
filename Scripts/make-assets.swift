@@ -154,8 +154,8 @@ func drawGlassPane(
 // The glyph: a window mid-move — a ghost pane at the old position behind,
 // the window itself arrived at the new position in front. Both panes sit
 // well inside the squircle so the icon keeps clear breathing room.
-let backPane = CGRect(x: 190, y: 460, width: 420, height: 330)
-let frontPane = CGRect(x: 380, y: 230, width: 440, height: 340)
+let backPane = CGRect(x: 220, y: 430, width: 420, height: 330)
+let frontPane = CGRect(x: 350, y: 260, width: 440, height: 340)
 
 func drawBackPane(_ cg: CGContext, backdrop: CGImage, boost: Bool) {
     drawGlassPane(
