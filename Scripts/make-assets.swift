@@ -302,7 +302,7 @@ func drawBanner(_ cg: CGContext, icon: CGImage) {
     let frame = CGPath(roundedRect: canvas, cornerWidth: 40, cornerHeight: 40, transform: nil)
     linearGradient(
         cg, in: frame,
-        colors: [color(0x14213F), color(0x0A1128)],
+        colors: [color(0x12294A), color(0x0A1428)],
         from: CGPoint(x: canvas.midX, y: canvas.maxY), to: CGPoint(x: canvas.midX, y: canvas.minY)
     )
 
@@ -366,7 +366,7 @@ func drawSocialPreview(_ cg: CGContext, icon: CGImage) {
     // corners itself, so transparent corners would show through as white.
     linearGradient(
         cg, in: CGPath(rect: canvas, transform: nil),
-        colors: [color(0x16244A), color(0x0A1128)],
+        colors: [color(0x143054), color(0x0A1428)],
         from: CGPoint(x: canvas.midX, y: canvas.maxY), to: CGPoint(x: canvas.midX, y: canvas.minY)
     )
 
