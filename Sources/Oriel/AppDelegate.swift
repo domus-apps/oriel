@@ -175,6 +175,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         )
 
         let menu = NSMenu()
+        let version =
+            Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev"
+        let about = NSMenuItem(title: "Oriel \(version)", action: nil, keyEquivalent: "")
+        about.isEnabled = false
+        menu.addItem(about)
+        menu.addItem(.separator())
         let settingsItem = NSMenuItem(
             title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
         settingsItem.target = self
