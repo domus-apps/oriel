@@ -16,6 +16,7 @@
 | `⌃⌥⌘←` | Move to previous display |
 | `⌃⌥←` | Left half of the current display |
 | `⌃⌥→` | Right half of the current display |
+| `⌃⌥C` | Center on the current display |
 
 Display moves are smarter than a plain teleport:
 

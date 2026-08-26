@@ -100,6 +100,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         case .previousDisplay: windowManager.moveToAdjacentDisplay(step: -1)
         case .leftHalf: windowManager.moveToHalf(.left)
         case .rightHalf: windowManager.moveToHalf(.right)
+        case .center: windowManager.center()
         case .restore: windowManager.restorePreviousFrame()
         }
     }

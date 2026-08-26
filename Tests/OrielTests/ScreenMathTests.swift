@@ -67,3 +67,34 @@ private let target = CGRect(x: 3840, y: 0, width: 1512, height: 945)
     #expect(abs(back.minY - window.minY) < 1)
     #expect(back.size == window.size)
 }
+
+// MARK: - centered(windowFrame:in:)
+
+@Test func centeringPlacesTheWindowMidScreen() {
+    let screen = CGRect(x: 3840, y: 25, width: 1512, height: 920)
+    let window = CGRect(x: 3900, y: 100, width: 800, height: 600)
+    let centered = ScreenMath.centered(windowFrame: window, in: screen)
+
+    #expect(centered.size == window.size)
+    #expect(abs(centered.midX - screen.midX) < 1)
+    #expect(abs(centered.midY - screen.midY) < 1)
+}
+
+@Test func centeringShrinksAnOversizedWindow() {
+    let screen = CGRect(x: 0, y: 25, width: 1512, height: 920)
+    let window = CGRect(x: -200, y: -100, width: 3000, height: 1800)
+    let centered = ScreenMath.centered(windowFrame: window, in: screen)
+
+    #expect(centered.size == screen.size)
+    #expect(centered.origin.x == screen.origin.x)
+    #expect(centered.origin.y == screen.origin.y)
+}
+
+@Test func centeringUsesIntegralOrigins() {
+    let screen = CGRect(x: 0, y: 0, width: 1511, height: 919)
+    let window = CGRect(x: 10, y: 10, width: 800, height: 600)
+    let centered = ScreenMath.centered(windowFrame: window, in: screen)
+
+    #expect(centered.origin.x == centered.origin.x.rounded())
+    #expect(centered.origin.y == centered.origin.y.rounded())
+}

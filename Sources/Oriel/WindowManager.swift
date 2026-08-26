@@ -99,6 +99,16 @@ final class WindowManager {
             alignTrailing: half == .right)
     }
 
+    // MARK: Center
+
+    func center() {
+        guard let window = AccessibilityWindow.focused(), let frame = window.frame else { return }
+        let screens = ScreenMath.orderedVisibleFrames()
+        guard !screens.isEmpty else { return }
+        let screen = screens[ScreenMath.screenIndex(containing: frame, in: screens)]
+        apply(ScreenMath.centered(windowFrame: frame, in: screen), to: window, currentFrame: frame)
+    }
+
     // MARK: History
 
     private func apply(

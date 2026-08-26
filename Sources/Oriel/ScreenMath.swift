@@ -85,4 +85,18 @@ enum ScreenMath {
         )
         return CGRect(origin: origin, size: size)
     }
+
+    /* Center the window on its screen, keeping its size — shrunk only if
+       it's larger than the screen, matching the display-move rule. */
+    static func centered(windowFrame: CGRect, in screen: CGRect) -> CGRect {
+        let size = CGSize(
+            width: min(windowFrame.width, screen.width),
+            height: min(windowFrame.height, screen.height)
+        )
+        let origin = CGPoint(
+            x: (screen.minX + (screen.width - size.width) / 2).rounded(),
+            y: (screen.minY + (screen.height - size.height) / 2).rounded()
+        )
+        return CGRect(origin: origin, size: size)
+    }
 }
