@@ -39,5 +39,27 @@
         sparkle:edSignature="FkCTpA0AMORpu/zcGTyp8z4q4XAEbTHM+T5T8vVFu5WO/lLP+7ysi2Umo2RO050lYyfYb6vjKiplQZ5DiEpkCg==" length="2718444"
         type="application/octet-stream"/>
     </item>
+    <item>
+      <title>Oriel v1.2.0</title>
+      <link>https://github.com/domus-apps/oriel/releases/tag/v1.2.0</link>
+      <pubDate>Wed, 26 Aug 2026 13:21:28 +0000</pubDate>
+      <description><![CDATA[
+<h3>Added</h3>
+<ul>
+<li>A Center action (⌃⌥C by default) that centers the focused window on its display, customizable like every other shortcut.</li>
+<li>First-run onboarding that explains the app and hosts the Accessibility permission ask — the launch-time system prompt is gone.</li>
+</ul>
+<h3>Changed</h3>
+<ul>
+<li>The status menu shows the app version at the top.</li>
+</ul>      ]]></description>
+      <sparkle:version>13</sparkle:version>
+      <sparkle:shortVersionString>1.2.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <enclosure
+        url="https://github.com/domus-apps/oriel/releases/download/v1.2.0/Oriel.zip"
+        sparkle:edSignature="zwyvSWVKJqkgN5mEHkpnSo3FH9EKG3BRuwLV8UFKqoJ0jniPP52HP3y661JTMfvPJd1kLRdwP+Q1IIAj2SNgDg==" length="2728765"
+        type="application/octet-stream"/>
+    </item>
   </channel>
 </rss>
