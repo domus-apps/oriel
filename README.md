@@ -1,9 +1,9 @@
 <p align="center">
-  <img src="Assets/banner.png" alt="Oriel — Keyboard-driven window management for macOS" />
+  <img src="Assets/banner.png" alt="Oriel — Keyboard-driven window manager for macOS" />
 </p>
 
 <p align="center">
-  A macOS menu bar app for moving and arranging windows with global keyboard shortcuts.<br />
+  A keyboard-driven window manager for macOS — move and arrange windows with global shortcuts.<br />
   A single dependency-free Swift Package — builds with the <code>swift</code> CLI alone, no Xcode project required.
 </p>
 

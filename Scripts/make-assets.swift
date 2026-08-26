@@ -331,7 +331,7 @@ func drawBanner(_ cg: CGContext, icon: CGImage) {
     ])
     title.draw(at: NSPoint(x: 520, y: 300))
 
-    let tagline = NSAttributedString(string: "Keyboard-driven window management for macOS", attributes: [
+    let tagline = NSAttributedString(string: "Keyboard-driven window manager for macOS", attributes: [
         .font: NSFont.systemFont(ofSize: 46, weight: .medium),
         .foregroundColor: NSColor(srgbRed: 0.62, green: 0.71, blue: 0.88, alpha: 1),
     ])
@@ -401,7 +401,7 @@ func drawSocialPreview(_ cg: CGContext, icon: CGImage) {
         ]), y: 238)
 
     drawCentered(
-        NSAttributedString(string: "Keyboard-driven window management for macOS", attributes: [
+        NSAttributedString(string: "Keyboard-driven window manager for macOS", attributes: [
             .font: NSFont.systemFont(ofSize: 38, weight: .medium),
             .foregroundColor: NSColor(srgbRed: 0.62, green: 0.71, blue: 0.88, alpha: 1),
         ]), y: 176)
