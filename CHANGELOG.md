@@ -4,6 +4,17 @@ All notable changes to Oriel are documented here. The release workflow publishes
 
 Keep each bullet on a single line: release notes render line breaks literally (both on GitHub and in the update dialog), so wrapped lines would break mid-sentence.
 
+## 1.2.0
+
+### Added
+
+- A Center action (⌃⌥C by default) that centers the focused window on its display, customizable like every other shortcut.
+- First-run onboarding that explains the app and hosts the Accessibility permission ask — the launch-time system prompt is gone.
+
+### Changed
+
+- The status menu shows the app version at the top.
+
 ## 1.1.0
 
 ### Fixed
