@@ -7,18 +7,40 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let updater = UpdaterController()
     private var statusItem: NSStatusItem?
     private var settingsWindowController: SettingsWindowController?
+    private var onboardingController: OnboardingWindowController?
+
+    private static let onboardingCompletedKey = "onboarding.completed"
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setUpMainMenu()
-        ensureAccessibilityPermission()
         applyShortcuts()
         observeShortcutChanges()
         observePreferenceChanges()
         updateStatusItemVisibility()
 
+        /* The Accessibility ask lives inside onboarding — no launch-time
+           prompt. Completion is only recorded when onboarding is finished
+           properly, so an interrupted (or force-quit) run shows it again. */
+        if !UserDefaults.standard.bool(forKey: Self.onboardingCompletedKey)
+            || CommandLine.arguments.contains("--onboarding")
+        {
+            showOnboarding()
+        }
+
         if CommandLine.arguments.contains("--settings") {
             openSettings()
         }
+    }
+
+    private func showOnboarding() {
+        if onboardingController == nil {
+            onboardingController = OnboardingWindowController { [weak self] in
+                UserDefaults.standard.set(true, forKey: Self.onboardingCompletedKey)
+                self?.onboardingController = nil
+            }
+        }
+        NSApp.activate(ignoringOtherApps: true)
+        onboardingController?.window?.makeKeyAndOrderFront(nil)
     }
 
     /* Launching the app again while it's already running sends "reopen" to
@@ -68,18 +90,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             mainMenu.addItem(item)
         }
         NSApp.mainMenu = mainMenu
-    }
-
-    private func ensureAccessibilityPermission() {
-        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
-        let trusted = AXIsProcessTrustedWithOptions(options as CFDictionary)
-        if !trusted {
-            NSLog(
-                "Oriel: waiting for Accessibility permission. "
-                    + "Grant it in System Settings > Privacy & Security > Accessibility, "
-                    + "then trigger any shortcut again."
-            )
-        }
     }
 
     private func applyShortcuts() {
