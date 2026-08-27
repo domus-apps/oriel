@@ -61,5 +61,21 @@
         sparkle:edSignature="zwyvSWVKJqkgN5mEHkpnSo3FH9EKG3BRuwLV8UFKqoJ0jniPP52HP3y661JTMfvPJd1kLRdwP+Q1IIAj2SNgDg==" length="2728765"
         type="application/octet-stream"/>
     </item>
+    <item>
+      <title>Oriel v1.2.1</title>
+      <link>https://github.com/domus-apps/oriel/releases/tag/v1.2.1</link>
+      <pubDate>Thu, 27 Aug 2026 02:00:48 +0000</pubDate>
+      <description><![CDATA[
+<ul>
+<li>Fixed: installing by COPYING the app (instead of Finder-moving it) left it running from Gatekeeper's translocated read-only path, which blocked Sparkle updates — the app now detects this at launch, clears the quarantine flag, and relaunches itself from its real location.</li>
+</ul>      ]]></description>
+      <sparkle:version>14</sparkle:version>
+      <sparkle:shortVersionString>1.2.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <enclosure
+        url="https://github.com/domus-apps/oriel/releases/download/v1.2.1/Oriel.zip"
+        sparkle:edSignature="A4M71b/efEjWStdrzOYoSAxNKdqWIHpRsgv1jcGwPIGZEr0s7Up5GknHybqQhkh3Y1JW+AsSR+j+SeajqXldBA==" length="2731452"
+        type="application/octet-stream"/>
+    </item>
   </channel>
 </rss>
