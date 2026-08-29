@@ -77,5 +77,22 @@
         sparkle:edSignature="A4M71b/efEjWStdrzOYoSAxNKdqWIHpRsgv1jcGwPIGZEr0s7Up5GknHybqQhkh3Y1JW+AsSR+j+SeajqXldBA==" length="2731452"
         type="application/octet-stream"/>
     </item>
+    <item>
+      <title>Oriel v1.3.0</title>
+      <link>https://github.com/domus-apps/oriel/releases/tag/v1.3.0</link>
+      <pubDate>Sat, 29 Aug 2026 01:53:39 +0000</pubDate>
+      <description><![CDATA[
+<h3>Changed</h3>
+<ul>
+<li>Moving a snapped window (left/right half or maximized) to another display now re-creates the same snap on the target display, instead of carrying the source display's absolute size over. Detection is geometric, so it applies to any window sitting in a snap position — whoever put it there.</li>
+</ul>      ]]></description>
+      <sparkle:version>15</sparkle:version>
+      <sparkle:shortVersionString>1.3.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <enclosure
+        url="https://github.com/domus-apps/oriel/releases/download/v1.3.0/Oriel.zip"
+        sparkle:edSignature="evNWdvoeW6GFNMf+gduMu5Aq6cVxr6g1rBv561LqFdMtd6mGSaQ38T0zkUeBiTOLx39ceD80EsYTZJrD2iBHAQ==" length="2732006"
+        type="application/octet-stream"/>
+    </item>
   </channel>
 </rss>
