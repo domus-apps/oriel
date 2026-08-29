@@ -68,6 +68,41 @@ private let target = CGRect(x: 3840, y: 0, width: 1512, height: 945)
     #expect(back.size == window.size)
 }
 
+// MARK: - Snap detection
+
+@Test func snappedWindowsAreDetected() {
+    for snap in ScreenMath.Snap.allCases {
+        let window = ScreenMath.snapFrame(snap, on: source)
+        #expect(ScreenMath.detectedSnap(of: window, on: source) == snap)
+    }
+}
+
+@Test func detectionToleratesFramesAppsNudged() {
+    let nearlyLeftHalf = ScreenMath.snapFrame(.leftHalf, on: source).insetBy(dx: 3, dy: 2)
+    #expect(ScreenMath.detectedSnap(of: nearlyLeftHalf, on: source) == .leftHalf)
+}
+
+@Test func ordinaryWindowIsNotDetectedAsSnapped() {
+    let window = CGRect(x: 900, y: 300, width: 1000, height: 700)
+    #expect(ScreenMath.detectedSnap(of: window, on: source) == nil)
+
+    let halfWidthButNotFullHeight = CGRect(x: 0, y: 0, width: 1920, height: 1000)
+    #expect(ScreenMath.detectedSnap(of: halfWidthButNotFullHeight, on: source) == nil)
+}
+
+@Test func snapFramesTileTheScreen() {
+    /* Odd width: both halves round down, leaving at most a 1pt seam. */
+    let screen = CGRect(x: 0, y: 25, width: 1511, height: 920)
+    let left = ScreenMath.snapFrame(.leftHalf, on: screen)
+    let right = ScreenMath.snapFrame(.rightHalf, on: screen)
+
+    #expect(left.width == right.width)
+    #expect(left.minX == screen.minX)
+    #expect(right.maxX == screen.maxX)
+    #expect(left.height == screen.height && right.height == screen.height)
+    #expect(ScreenMath.snapFrame(.maximized, on: screen) == screen)
+}
+
 // MARK: - centered(windowFrame:in:)
 
 @Test func centeringPlacesTheWindowMidScreen() {

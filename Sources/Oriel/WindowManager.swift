@@ -57,7 +57,8 @@ final class WindowManager {
         }
     }
 
-    // MARK: Move across displays, preserving relative position and size
+    // MARK: Move across displays — snapped windows re-snap on the target,
+    // everything else keeps its size and relative position
 
     func moveToAdjacentDisplay(step: Int) {
         guard let window = AccessibilityWindow.focused(), let frame = window.frame else { return }
@@ -67,13 +68,16 @@ final class WindowManager {
         let currentIndex = ScreenMath.screenIndex(containing: frame, in: screens)
         let count = screens.count
         let targetIndex = ((currentIndex + step) % count + count) % count
+        let source = screens[currentIndex]
+        let target = screens[targetIndex]
 
-        let newFrame = ScreenMath.relativeReposition(
-            windowFrame: frame,
-            from: screens[currentIndex],
-            to: screens[targetIndex]
-        )
-        apply(newFrame, to: window, currentFrame: frame, resetsRestorePoint: true)
+        let snap = ScreenMath.detectedSnap(of: frame, on: source)
+        let newFrame =
+            snap.map { ScreenMath.snapFrame($0, on: target) }
+            ?? ScreenMath.relativeReposition(windowFrame: frame, from: source, to: target)
+        apply(
+            newFrame, to: window, currentFrame: frame,
+            alignTrailing: snap == .rightHalf, resetsRestorePoint: true)
     }
 
     // MARK: Halves
@@ -84,14 +88,8 @@ final class WindowManager {
         guard !screens.isEmpty else { return }
         let screen = screens[ScreenMath.screenIndex(containing: frame, in: screens)]
 
-        let width = (screen.width / 2).rounded(.down)
-        let origin: CGPoint =
-            switch half {
-            case .left: CGPoint(x: screen.minX, y: screen.minY)
-            case .right: CGPoint(x: screen.maxX - width, y: screen.minY)
-            }
         apply(
-            CGRect(origin: origin, size: CGSize(width: width, height: screen.height)),
+            ScreenMath.snapFrame(half == .left ? .leftHalf : .rightHalf, on: screen),
             to: window, currentFrame: frame,
             /* A window that refuses the half width would otherwise be left
                hanging at the target origin — mid-screen for the right half —
@@ -147,12 +145,7 @@ final class WindowManager {
         }
     }
 
-    /* Some apps refuse the exact requested frame by a few points (size
-       constraints, integral rounding), so frame comparisons need slack. */
-    private func isApproximately(_ a: CGRect, _ b: CGRect, tolerance: CGFloat = 8) -> Bool {
-        abs(a.minX - b.minX) <= tolerance
-            && abs(a.minY - b.minY) <= tolerance
-            && abs(a.width - b.width) <= tolerance
-            && abs(a.height - b.height) <= tolerance
+    private func isApproximately(_ a: CGRect, _ b: CGRect) -> Bool {
+        ScreenMath.approximatelyEqual(a, b)
     }
 }

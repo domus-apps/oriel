@@ -86,6 +86,44 @@ enum ScreenMath {
         return CGRect(origin: origin, size: size)
     }
 
+    /* Snapped states are the exception to the keep-size rule: a window
+       occupying a half or the whole of its screen is proportional by
+       intent, so a display move re-creates the same snap on the target
+       screen instead of carrying the source screen's absolute size over. */
+    enum Snap: CaseIterable {
+        case leftHalf, rightHalf, maximized
+    }
+
+    static func snapFrame(_ snap: Snap, on screen: CGRect) -> CGRect {
+        switch snap {
+        case .maximized:
+            return screen
+        case .leftHalf, .rightHalf:
+            let width = (screen.width / 2).rounded(.down)
+            let x = snap == .leftHalf ? screen.minX : screen.maxX - width
+            return CGRect(x: x, y: screen.minY, width: width, height: screen.height)
+        }
+    }
+
+    /* Detection is geometric, not action history: a window still sitting
+       where a snap would put it counts, whoever put it there. */
+    static func detectedSnap(
+        of windowFrame: CGRect, on screen: CGRect, tolerance: CGFloat = 8
+    ) -> Snap? {
+        Snap.allCases.first {
+            approximatelyEqual(snapFrame($0, on: screen), windowFrame, tolerance: tolerance)
+        }
+    }
+
+    /* Some apps refuse the exact requested frame by a few points (size
+       constraints, integral rounding), so frame comparisons need slack. */
+    static func approximatelyEqual(_ a: CGRect, _ b: CGRect, tolerance: CGFloat = 8) -> Bool {
+        abs(a.minX - b.minX) <= tolerance
+            && abs(a.minY - b.minY) <= tolerance
+            && abs(a.width - b.width) <= tolerance
+            && abs(a.height - b.height) <= tolerance
+    }
+
     /* Center the window on its screen, keeping its size — shrunk only if
        it's larger than the screen, matching the display-move rule. */
     static func centered(windowFrame: CGRect, in screen: CGRect) -> CGRect {
