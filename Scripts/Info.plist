@@ -2,6 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleAlternateNames</key>
+	<array>
+		<string>오리엘</string>
+		<string>오리얼</string>
+		<string>창 관리</string>
+		<string>window manager</string>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>Oriel</string>
 	<key>CFBundleIconFile</key>
