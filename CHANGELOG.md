@@ -4,6 +4,12 @@ All notable changes to Oriel are documented here. The release workflow publishes
 
 Keep each bullet on a single line: release notes render line breaks literally (both on GitHub and in the update dialog), so wrapped lines would break mid-sentence.
 
+## 1.3.1
+
+### Added
+
+- Spotlight now finds the app by its Korean name and by what it does — 오리엘, 오리얼, 창 관리, and window manager all match.
+
 ## 1.3.0
 
 ### Changed
