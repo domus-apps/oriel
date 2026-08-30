@@ -94,5 +94,22 @@
         sparkle:edSignature="evNWdvoeW6GFNMf+gduMu5Aq6cVxr6g1rBv561LqFdMtd6mGSaQ38T0zkUeBiTOLx39ceD80EsYTZJrD2iBHAQ==" length="2732006"
         type="application/octet-stream"/>
     </item>
+    <item>
+      <title>Oriel v1.3.1</title>
+      <link>https://github.com/domus-apps/oriel/releases/tag/v1.3.1</link>
+      <pubDate>Sun, 30 Aug 2026 01:38:49 +0000</pubDate>
+      <description><![CDATA[
+<h3>Added</h3>
+<ul>
+<li>Spotlight now finds the app by its Korean name and by what it does — 오리엘, 오리얼, 창 관리, and window manager all match.</li>
+</ul>      ]]></description>
+      <sparkle:version>16</sparkle:version>
+      <sparkle:shortVersionString>1.3.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <enclosure
+        url="https://github.com/domus-apps/oriel/releases/download/v1.3.1/Oriel.zip"
+        sparkle:edSignature="S7f7JC0ZktshTQWcxT+rIYO/90MYJ1WSlGbB8Q6WLtb0cOpYLEpA103Oj6YtioR1Qt/o4r2/odURVNVi4rECAQ==" length="2732109"
+        type="application/octet-stream"/>
+    </item>
   </channel>
 </rss>
