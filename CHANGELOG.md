@@ -8,24 +8,24 @@ Keep each bullet on a single line: release notes render line breaks literally (b
 
 ### Added
 
-- Spotlight now finds the app by its Korean name and by what it does — 오리엘, 오리얼, 창 관리, and window manager all match.
+- Spotlight now finds the app by its Korean name and by what it does: 오리엘, 오리얼, 창 관리, and window manager all match.
 
 ## 1.3.0
 
 ### Changed
 
-- Moving a snapped window (left/right half or maximized) to another display now re-creates the same snap on the target display, instead of carrying the source display's absolute size over. Detection is geometric, so it applies to any window sitting in a snap position — whoever put it there.
+- Moving a snapped window (left/right half or maximized) to another display now re-creates the same snap on the target display, instead of carrying the source display's absolute size over. Detection is geometric, so it applies to any window sitting in a snap position, whoever put it there.
 
 ## 1.2.1
 
-- Fixed: installing by COPYING the app (instead of Finder-moving it) left it running from Gatekeeper's translocated read-only path, which blocked Sparkle updates — the app now detects this at launch, clears the quarantine flag, and relaunches itself from its real location.
+- Fixed: installing by COPYING the app (instead of Finder-moving it) left it running from Gatekeeper's translocated read-only path, which blocked Sparkle updates. The app now detects this at launch, clears the quarantine flag, and relaunches itself from its real location.
 
 ## 1.2.0
 
 ### Added
 
 - A Center action (⌃⌥C by default) that centers the focused window on its display, customizable like every other shortcut.
-- First-run onboarding that explains the app and hosts the Accessibility permission ask — the launch-time system prompt is gone.
+- First-run onboarding that explains the app and hosts the Accessibility permission ask; the launch-time system prompt is gone.
 
 ### Changed
 
@@ -35,7 +35,7 @@ Keep each bullet on a single line: release notes render line breaks literally (b
 
 ### Fixed
 
-- Windows that refuse horizontal resizing (fixed-width windows) now snap flush to the display's right edge instead of stopping at mid-screen — and without flickering through an intermediate position.
+- Windows that refuse horizontal resizing (fixed-width windows) now snap flush to the display's right edge instead of stopping at mid-screen, and without flickering through an intermediate position.
 - Restore now returns to the window's position from before the whole chain of snap/maximize actions, not just the most recent one, including for windows that clamp their size.
 
 ### Changed
