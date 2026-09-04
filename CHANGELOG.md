@@ -25,7 +25,7 @@ Keep each bullet on a single line: release notes render line breaks literally (b
 ### Added
 
 - A Center action (⌃⌥C by default) that centers the focused window on its display, customizable like every other shortcut.
-- First-run onboarding that explains the app and hosts the Accessibility permission ask; the launch-time system prompt is gone.
+- First-run onboarding that explains the app and hosts the Accessibility permission ask. The launch-time system prompt is gone.
 
 ### Changed
 

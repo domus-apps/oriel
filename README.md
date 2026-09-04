@@ -70,7 +70,7 @@ The release workflow signs and notarizes automatically when these repository sec
 | `NOTARY_KEY_P8` | Contents of an App Store Connect API key (`.p8`, Developer role) |
 | `NOTARY_KEY_ID` | The API key's Key ID |
 | `NOTARY_ISSUER_ID` | The API key's Issuer ID |
-| `SPARKLE_ED_PRIVATE_KEY` | Sparkle EdDSA private key (`generate_keys -x`) for signing auto-updates; must match `SUPublicEDKey` in `Scripts/Info.plist` |
+| `SPARKLE_ED_PRIVATE_KEY` | Sparkle EdDSA private key (`generate_keys -x`) for signing auto-updates, must match `SUPublicEDKey` in `Scripts/Info.plist` |
 
 ### Auto-updates (Sparkle)
 
@@ -116,10 +116,10 @@ down. If you prefer an FSEvents-based watcher: `brew install watchexec`, then
 ### Manual test checklist
 
 1. `swift run` → the menu bar icon appears.
-2. Focus any window and try `⌃⌥←` / `⌃⌥→`: the half placements fail the least, so they're a
+2. Focus any window and try `⌃⌥←` / `⌃⌥→`. The half placements fail the least, so they're a
    good first check of permissions and coordinates.
-3. `⌃⌥↩` twice: maximizes, then returns to the original size and position.
-4. With 2+ displays, `⌃⌥⌘→` / `⌃⌥⌘←`: size preserved, relative position keeps its ratio,
+3. `⌃⌥↩` twice maximizes, then returns to the original size and position.
+4. With 2+ displays, `⌃⌥⌘→` / `⌃⌥⌘←`. Size preserved, relative position keeps its ratio,
    nothing lands off-screen on a smaller display.
 5. Edge cases: vertically arranged displays, a Dock on only one monitor, fixed-size windows
    (resize may be refused, but the position must still move).
