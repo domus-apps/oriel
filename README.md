@@ -159,3 +159,9 @@ coordinates, 90% of multi-display bugs come from missing this conversion.
 
 The settings UI is dependency-free AppKit. (It began under a Command Line Tools–only
 environment, where the SwiftUI macro plugin isn't available; everything works, so it stayed.)
+
+## License
+
+MIT, see [LICENSE](LICENSE). Bundled third-party software and its licenses are listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
+Inspired by [Rectangle](https://github.com/rxhanson/Rectangle). No code is shared.
