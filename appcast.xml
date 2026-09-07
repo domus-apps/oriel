@@ -111,5 +111,39 @@
         sparkle:edSignature="S7f7JC0ZktshTQWcxT+rIYO/90MYJ1WSlGbB8Q6WLtb0cOpYLEpA103Oj6YtioR1Qt/o4r2/odURVNVi4rECAQ==" length="2732109"
         type="application/octet-stream"/>
     </item>
+    <item>
+      <title>Oriel v1.3.2</title>
+      <link>https://github.com/domus-apps/oriel/releases/tag/v1.3.2</link>
+      <pubDate>Mon, 07 Sep 2026 07:14:44 +0000</pubDate>
+      <description xml:lang="en"><![CDATA[
+<h2>1.3.2</h2>
+<h3>Fixed</h3>
+<ul>
+<li>Fixed steady processor use that began once Settings had been opened and went on after the window was closed.</li>
+</ul>
+<h2>1.3.1</h2>
+<h3>Added</h3>
+<ul>
+<li>Spotlight now finds the app by its Korean name and by what it does: 오리엘, 오리얼, 창 관리, and window manager all match.</li>
+</ul>
+<h2>1.3.0</h2>
+<h3>Changed</h3>
+<ul>
+<li>Moving a snapped window (left/right half or maximized) to another display now re-creates the same snap on the target display, instead of carrying the source display's absolute size over. Detection is geometric, so it applies to any window sitting in a snap position, whoever put it there.</li>
+</ul>      ]]></description>
+      <description xml:lang="ko"><![CDATA[
+<h2>1.3.2</h2>
+<h3>수정</h3>
+<ul>
+<li>설정 창을 한 번 열면 창을 닫은 뒤에도 CPU를 계속 사용하던 문제를 고쳤습니다.</li>
+</ul>      ]]></description>
+      <sparkle:version>17</sparkle:version>
+      <sparkle:shortVersionString>1.3.2</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <enclosure
+        url="https://github.com/domus-apps/oriel/releases/download/v1.3.2/Oriel.zip"
+        sparkle:edSignature="QlYF8d/O5GFPRtZ6qaeI4NCnp4Vkm5aDvNPZgwOT673+3zfO0Imv+RE1HzK8EIr85gqo/rIVtPAe2R/8ifluCg==" length="2732152"
+        type="application/octet-stream"/>
+    </item>
   </channel>
 </rss>
