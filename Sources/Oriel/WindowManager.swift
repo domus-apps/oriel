@@ -80,21 +80,31 @@ final class WindowManager {
             alignTrailing: snap == .rightHalf, resetsRestorePoint: true)
     }
 
-    // MARK: Halves
+    // MARK: Halves — a window already in the requested half continues onto
+    // the adjacent display and takes the near half there (see
+    // ScreenMath.halfPlacement)
 
     func moveToHalf(_ half: Half) {
         guard let window = AccessibilityWindow.focused(), let frame = window.frame else { return }
         let screens = ScreenMath.orderedVisibleFrames()
         guard !screens.isEmpty else { return }
-        let screen = screens[ScreenMath.screenIndex(containing: frame, in: screens)]
+
+        let currentIndex = ScreenMath.screenIndex(containing: frame, in: screens)
+        let placement = ScreenMath.halfPlacement(
+            requesting: half == .left ? .leftHalf : .rightHalf,
+            windowFrame: frame, screens: screens)
 
         apply(
-            ScreenMath.snapFrame(half == .left ? .leftHalf : .rightHalf, on: screen),
+            ScreenMath.snapFrame(placement.snap, on: screens[placement.screenIndex]),
             to: window, currentFrame: frame,
             /* A window that refuses the half width would otherwise be left
                hanging at the target origin — mid-screen for the right half —
                so re-anchor it to the edge the action aimed for. */
-            alignTrailing: half == .right)
+            alignTrailing: placement.snap == .rightHalf,
+            /* Crossing to another display starts a new restore chain, same
+               as an explicit display move: Restore should return to where
+               the window landed on that display, not yank it back. */
+            resetsRestorePoint: placement.screenIndex != currentIndex)
     }
 
     // MARK: Center

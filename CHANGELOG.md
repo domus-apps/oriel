@@ -4,6 +4,12 @@ All notable changes to Oriel are documented here. The release workflow publishes
 
 Keep each bullet on a single line: release notes render line breaks literally (both on GitHub and in the update dialog), so wrapped lines would break mid-sentence.
 
+## 1.4.0
+
+### Added
+
+- With more than one display, the half shortcuts continue onto the next display, so pressing Right Half on a window already in the right half moves it to the left half of the display to its right, and Left Half works the same way toward the left.
+
 ## 1.3.2
 
 ### Fixed

@@ -133,3 +133,69 @@ private let target = CGRect(x: 3840, y: 0, width: 1512, height: 945)
     #expect(centered.origin.x == centered.origin.x.rounded())
     #expect(centered.origin.y == centered.origin.y.rounded())
 }
+
+// MARK: - halfPlacement(requesting:windowFrame:screens:)
+
+private let twoScreens = [source, target]
+
+@Test func halfRequestSnapsOnTheCurrentDisplayFirst() {
+    let window = CGRect(x: 900, y: 300, width: 1000, height: 700)
+    let placement = ScreenMath.halfPlacement(
+        requesting: .rightHalf, windowFrame: window, screens: twoScreens)
+    #expect(placement.screenIndex == 0)
+    #expect(placement.snap == .rightHalf)
+}
+
+@Test func rightHalfAgainContinuesToTheNextDisplaysLeftHalf() {
+    let rightHalf = ScreenMath.snapFrame(.rightHalf, on: source)
+    let placement = ScreenMath.halfPlacement(
+        requesting: .rightHalf, windowFrame: rightHalf, screens: twoScreens)
+    #expect(placement.screenIndex == 1)
+    #expect(placement.snap == .leftHalf)
+}
+
+@Test func leftHalfAgainContinuesToThePreviousDisplaysRightHalf() {
+    let leftHalf = ScreenMath.snapFrame(.leftHalf, on: target)
+    let placement = ScreenMath.halfPlacement(
+        requesting: .leftHalf, windowFrame: leftHalf, screens: twoScreens)
+    #expect(placement.screenIndex == 0)
+    #expect(placement.snap == .rightHalf)
+}
+
+@Test func halfCyclingWrapsAroundLikeDisplayMoves() {
+    let lastRight = ScreenMath.snapFrame(.rightHalf, on: target)
+    let forward = ScreenMath.halfPlacement(
+        requesting: .rightHalf, windowFrame: lastRight, screens: twoScreens)
+    #expect(forward.screenIndex == 0)
+    #expect(forward.snap == .leftHalf)
+
+    let firstLeft = ScreenMath.snapFrame(.leftHalf, on: source)
+    let backward = ScreenMath.halfPlacement(
+        requesting: .leftHalf, windowFrame: firstLeft, screens: twoScreens)
+    #expect(backward.screenIndex == 1)
+    #expect(backward.snap == .rightHalf)
+}
+
+@Test func halfRequestOnTheOppositeHalfStaysOnTheDisplay() {
+    let leftHalf = ScreenMath.snapFrame(.leftHalf, on: source)
+    let placement = ScreenMath.halfPlacement(
+        requesting: .rightHalf, windowFrame: leftHalf, screens: twoScreens)
+    #expect(placement.screenIndex == 0)
+    #expect(placement.snap == .rightHalf)
+}
+
+@Test func halfCyclingToleratesFramesAppsNudged() {
+    let nearlyRightHalf = ScreenMath.snapFrame(.rightHalf, on: source).insetBy(dx: 3, dy: 2)
+    let placement = ScreenMath.halfPlacement(
+        requesting: .rightHalf, windowFrame: nearlyRightHalf, screens: twoScreens)
+    #expect(placement.screenIndex == 1)
+    #expect(placement.snap == .leftHalf)
+}
+
+@Test func singleDisplayNeverCyclesHalves() {
+    let rightHalf = ScreenMath.snapFrame(.rightHalf, on: source)
+    let placement = ScreenMath.halfPlacement(
+        requesting: .rightHalf, windowFrame: rightHalf, screens: [source])
+    #expect(placement.screenIndex == 0)
+    #expect(placement.snap == .rightHalf)
+}

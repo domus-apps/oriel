@@ -115,6 +115,28 @@ enum ScreenMath {
         }
     }
 
+    /* Halves chain across displays: a window already sitting in the half it
+       was asked for has nowhere further to go on its screen, so the same key
+       carries it onto the adjacent display in that direction and takes the
+       near half there — right half → next display's left half, left half →
+       previous display's right half. Repeating the key walks every half
+       position in order, wrapping like the display moves do. With a single
+       display the request is a no-op re-snap: cycling between the two halves
+       of one screen would read as the window jumping the wrong way. */
+    static func halfPlacement(
+        requesting half: Snap, windowFrame: CGRect, screens: [CGRect]
+    ) -> (screenIndex: Int, snap: Snap) {
+        let index = screenIndex(containing: windowFrame, in: screens)
+        guard screens.count > 1, half == .leftHalf || half == .rightHalf,
+            detectedSnap(of: windowFrame, on: screens[index]) == half
+        else { return (index, half) }
+
+        let step = half == .rightHalf ? 1 : -1
+        let count = screens.count
+        let target = ((index + step) % count + count) % count
+        return (target, half == .rightHalf ? .leftHalf : .rightHalf)
+    }
+
     /* Some apps refuse the exact requested frame by a few points (size
        constraints, integral rounding), so frame comparisons need slack. */
     static func approximatelyEqual(_ a: CGRect, _ b: CGRect, tolerance: CGFloat = 8) -> Bool {

@@ -27,6 +27,11 @@ Display moves are smarter than a plain teleport:
   flush against that edge.
 - **Moves wrap around**: from the last display, "next" cycles back to the first.
 
+The half shortcuts continue across displays too: pressing `⌃⌥→` on a window that already fills
+the right half carries it to the left half of the next display, and `⌃⌥←` on a left-half window
+carries it to the right half of the previous display. Repeating the key walks every half
+position in order. With a single display the halves stay put.
+
 ## Settings
 
 Open from the menu bar icon → **Settings…** (a System Settings–style sidebar window).
