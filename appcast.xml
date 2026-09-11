@@ -228,5 +228,49 @@
         sparkle:edSignature="iYDFZFibYixyG4EGPsQq2xGzWboQpzl6OW4IHtiFZInTP3E5Nn3eAjshb5l9I4qJOK+dud6+3RWuKjH/qUnIDA==" length="2733309"
         type="application/octet-stream"/>
     </item>
+    <item>
+      <title>Oriel v1.4.2</title>
+      <link>https://github.com/domus-apps/oriel/releases/tag/v1.4.2</link>
+      <pubDate>Fri, 11 Sep 2026 05:46:20 +0000</pubDate>
+      <description xml:lang="en"><![CDATA[
+<h2>1.4.2</h2>
+<h3>Fixed</h3>
+<ul>
+<li>The app icon's background looked flat in the Dock and Finder. It now shows its gradient.</li>
+</ul>
+<h2>1.4.1</h2>
+<h3>Fixed</h3>
+<ul>
+<li>Closing Settings or the welcome window now returns you to the app you were using, so other apps' shortcuts keep working right away.</li>
+</ul>
+<h2>1.4.0</h2>
+<h3>Added</h3>
+<ul>
+<li>With more than one display, the half shortcuts continue onto the next display, so pressing Right Half on a window already in the right half moves it to the left half of the display to its right, and Left Half works the same way toward the left.</li>
+</ul>      ]]></description>
+      <description xml:lang="ko"><![CDATA[
+<h2>1.4.2</h2>
+<h3>수정</h3>
+<ul>
+<li>Dock과 Finder에서 앱 아이콘 배경이 평면으로 보이던 문제를 고쳤습니다.</li>
+</ul>
+<h2>1.4.1</h2>
+<h3>수정</h3>
+<ul>
+<li>설정 창이나 시작 안내 창을 닫으면 이전에 쓰던 앱으로 바로 돌아가, 다른 앱의 단축키가 곧바로 동작합니다.</li>
+</ul>
+<h2>1.4.0</h2>
+<h3>추가</h3>
+<ul>
+<li>디스플레이가 둘 이상이면 절반 단축키가 다음 디스플레이로 이어져, 이미 오른쪽 절반에 있는 창에서 오른쪽 절반을 누르면 오른쪽 디스플레이의 왼쪽 절반으로 이동하고, 왼쪽 절반도 같은 방식으로 왼쪽으로 이어집니다.</li>
+</ul>      ]]></description>
+      <sparkle:version>20</sparkle:version>
+      <sparkle:shortVersionString>1.4.2</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <enclosure
+        url="https://github.com/domus-apps/oriel/releases/download/v1.4.2/Oriel.zip"
+        sparkle:edSignature="CjQALP66K2WauY6fkX5jfqHN6kfs2Pqf/wqgpmVATTH4PrcTiHuD9oAtP3DEIdqImbwkN8ECWwWyJq7VFp9DBA==" length="2837736"
+        type="application/octet-stream"/>
+    </item>
   </channel>
 </rss>
