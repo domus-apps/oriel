@@ -368,5 +368,77 @@
         sparkle:edSignature="07fFJ38yXHGsYocUvMpmmOEGnKGNS+Gv3EzMjJagiVjav8IkQ8Qz9KHC8kAJjyN65L+KyUfIWItDrgEVkcIuBg==" length="2843239"
         type="application/octet-stream"/>
     </item>
+    <item>
+      <title>Oriel v1.5.0</title>
+      <link>https://github.com/domus-apps/oriel/releases/tag/v1.5.0</link>
+      <pubDate>Mon, 19 Oct 2026 11:52:06 +0000</pubDate>
+      <description xml:lang="en"><![CDATA[
+<h2>1.5.0</h2>
+<h3>Added</h3>
+<ul>
+<li>Oriel is available in Korean. The menu, Settings, and welcome window follow the macOS language.</li>
+</ul>
+<h3>Changed</h3>
+<ul>
+<li>Settings uses the system's grouped style, with section headers and rounded boxes like Xcode's settings.</li>
+</ul>
+<h3>Fixed</h3>
+<ul>
+<li>Shortcuts recorded while a Korean input source was on showed a Korean letter instead of the key.</li>
+<li>Shortcuts using F1 through F20 showed a blank key.</li>
+<li>Closing Settings or switching apps while recording a shortcut left every shortcut off until Settings was opened again.</li>
+</ul>
+<h2>1.4.4</h2>
+<h3>Changed</h3>
+<ul>
+<li>Opening Oriel again while it's running, from Spotlight or the Applications folder, brings up Settings.</li>
+</ul>
+<h3>Fixed</h3>
+<ul>
+<li>With the menu bar icon hidden, opening Oriel when it wasn't running showed no window.</li>
+</ul>
+<h2>1.4.3</h2>
+<h3>Fixed</h3>
+<ul>
+<li>The Settings window could no longer be dragged after a switch in it was flipped.</li>
+</ul>      ]]></description>
+      <description xml:lang="ko"><![CDATA[
+<h2>1.5.0</h2>
+<h3>추가</h3>
+<ul>
+<li>한국어를 지원합니다. macOS 언어가 한국어이면 메뉴, 설정, 환영 화면이 한국어로 표시됩니다.</li>
+</ul>
+<h3>변경</h3>
+<ul>
+<li>설정 창을 Xcode 설정처럼 섹션 제목과 둥근 상자로 나뉜 시스템 스타일로 바꿨습니다.</li>
+</ul>
+<h3>수정</h3>
+<ul>
+<li>한글 입력 상태에서 녹화한 단축키가 키 대신 한글 자모로 표시되던 문제를 수정했습니다.</li>
+<li>F1부터 F20까지의 키를 쓴 단축키가 빈칸으로 표시되던 문제를 수정했습니다.</li>
+<li>단축키를 녹화하는 도중 설정 창을 닫거나 다른 앱으로 전환하면 설정을 다시 열 때까지 모든 단축키가 동작하지 않던 문제를 수정했습니다.</li>
+</ul>
+<h2>1.4.4</h2>
+<h3>변경</h3>
+<ul>
+<li>실행 중인 Oriel을 Spotlight나 응용 프로그램 폴더에서 다시 열어 설정 창을 띄울 수 있습니다.</li>
+</ul>
+<h3>수정</h3>
+<ul>
+<li>메뉴 막대 아이콘을 숨긴 상태에서 꺼져 있던 Oriel을 열면 아무 창도 나타나지 않던 문제를 수정했습니다.</li>
+</ul>
+<h2>1.4.3</h2>
+<h3>수정</h3>
+<ul>
+<li>설정 창의 스위치를 켜거나 끈 뒤 창을 끌어 옮길 수 없던 문제를 수정했습니다.</li>
+</ul>      ]]></description>
+      <sparkle:version>23</sparkle:version>
+      <sparkle:shortVersionString>1.5.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <enclosure
+        url="https://github.com/domus-apps/oriel/releases/download/v1.5.0/Oriel.zip"
+        sparkle:edSignature="qcfmQ2UNeQowrphf/AR5+402zVI4xKkDLbjCE+ij1SPkufAvjTFwCF0DmuHV/1vhIyMxAl2oX+jKd6G3KACFCA==" length="2868978"
+        type="application/octet-stream"/>
+    </item>
   </channel>
 </rss>
