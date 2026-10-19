@@ -11,6 +11,11 @@ APP=build/Oriel.app
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp .build/release/Oriel "$APP/Contents/MacOS/Oriel"
+# Localizations: SwiftPM packs the .lproj string tables into a resource
+# bundle; the app resolves it from Contents/Resources by hand (see
+# Sources/Oriel/Localization.swift — the generated accessor can't be
+# trusted across toolchains).
+cp -R .build/release/Oriel_Oriel.bundle "$APP/Contents/Resources/"
 cp Scripts/Info.plist "$APP/Contents/Info.plist"
 
 # Embed Sparkle.framework (auto-update). The binary references it via

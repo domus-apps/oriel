@@ -9,6 +9,8 @@
 		<string>창 관리</string>
 		<string>window manager</string>
 	</array>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
 	<key>CFBundleExecutable</key>
 	<string>Oriel</string>
 	<key>CFBundleIconFile</key>
@@ -17,6 +19,11 @@
 	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.jhaemin.oriel</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>ko</string>
+	</array>
 	<key>CFBundleName</key>
 	<string>Oriel</string>
 	<key>CFBundlePackageType</key>

@@ -112,24 +112,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func setUpMainMenu() {
         let appMenu = NSMenu()
         let settingsItem = NSMenuItem(
-            title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
+            title: L("Settings…"), action: #selector(openSettings), keyEquivalent: ",")
         settingsItem.target = self
         appMenu.addItem(settingsItem)
         appMenu.addItem(updater.makeMenuItem())
         appMenu.addItem(.separator())
         appMenu.addItem(
             NSMenuItem(
-                title: "Quit Oriel",
+                title: L("Quit Oriel"),
                 action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
 
-        let windowMenu = NSMenu(title: "Window")
+        let windowMenu = NSMenu(title: L("Window"))
         windowMenu.addItem(
             NSMenuItem(
-                title: "Close Window",
+                title: L("Close Window"),
                 action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w"))
         windowMenu.addItem(
             NSMenuItem(
-                title: "Minimize",
+                title: L("Minimize"),
                 action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m"))
 
         let mainMenu = NSMenu()
@@ -305,13 +305,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(about)
         menu.addItem(.separator())
         let settingsItem = NSMenuItem(
-            title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
+            title: L("Settings…"), action: #selector(openSettings), keyEquivalent: ",")
         settingsItem.target = self
         menu.addItem(settingsItem)
         menu.addItem(updater.makeMenuItem())
         menu.addItem(.separator())
         menu.addItem(
-            NSMenuItem(title: "Quit Oriel", action: #selector(quit), keyEquivalent: "q"))
+            NSMenuItem(title: L("Quit Oriel"), action: #selector(quit), keyEquivalent: "q"))
         item.menu = menu
         statusItem = item
     }

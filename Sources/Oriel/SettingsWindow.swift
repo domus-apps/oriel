@@ -1,6 +1,7 @@
 import AppKit
 import Carbon.HIToolbox
 import ServiceManagement
+import SwiftUI
 
 extension Notification.Name {
     /* Recording captures key events locally, so the app must drop its global
@@ -18,8 +19,8 @@ enum SettingsPane: Int, CaseIterable {
 
     var title: String {
         switch self {
-        case .general: "General"
-        case .shortcuts: "Shortcuts"
+        case .general: L("General")
+        case .shortcuts: L("Shortcuts")
         }
     }
 
@@ -55,7 +56,7 @@ final class SettingsWindowController: NSWindowController {
         toolbar.displayMode = .iconOnly
         window.toolbar = toolbar
         window.isReleasedWhenClosed = false
-        window.setContentSize(NSSize(width: 640, height: 380))
+        window.setContentSize(NSSize(width: 640, height: 500))
         window.center()
 
         super.init(window: window)
@@ -98,13 +99,17 @@ final class SettingsSplitViewController: NSSplitViewController {
 
     private let sidebar = SettingsSidebarViewController()
     private let paneContainer = NSViewController()
-    private let generalPane: GeneralPaneViewController
-    private let shortcutsPane: ShortcutsPaneViewController
+    private let generalPane: NSViewController
+    private let shortcutsPane: NSViewController
     private var currentPane: NSViewController?
 
     init(store: ShortcutStore, updater: UpdaterController) {
-        generalPane = GeneralPaneViewController(updater: updater)
-        shortcutsPane = ShortcutsPaneViewController(store: store)
+        /* The panes are SwiftUI grouped Forms — the exact section-header +
+           rounded-box arrangement Xcode's settings use — hosted inside the
+           AppKit split chrome. */
+        let model = SettingsModel(store: store, updater: updater)
+        generalPane = NSHostingController(rootView: GeneralSettingsView(model: model))
+        shortcutsPane = NSHostingController(rootView: ShortcutSettingsView(model: model))
         super.init(nibName: nil, bundle: nil)
 
         paneContainer.view = NSView()
@@ -280,165 +285,166 @@ final class SettingsSidebarViewController: NSViewController, NSTableViewDataSour
     }
 }
 
+// MARK: - SwiftUI bridge
+
+/* One shared model for both panes: preferences live in UserDefaults (via
+   AppPreferences and ShortcutStore); this object just republishes their
+   change notifications so SwiftUI re-reads, and carries the pieces that
+   aren't preferences (SMAppService, the updater). */
+final class SettingsModel: ObservableObject {
+    let store: ShortcutStore
+    let updater: UpdaterController
+
+    init(store: ShortcutStore, updater: UpdaterController) {
+        self.store = store
+        self.updater = updater
+        for name in [AppPreferences.changed, ShortcutStore.changed] {
+            NotificationCenter.default.addObserver(
+                forName: name, object: nil, queue: .main
+            ) { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+        }
+    }
+
+    /* SMAppService needs a real app bundle; a bare `swift run` binary has
+       no bundle identifier to register. */
+    var isBundledApp: Bool { Bundle.main.bundleIdentifier != nil }
+
+    var launchAtLogin: Bool {
+        get { SMAppService.mainApp.status == .enabled }
+        set {
+            do {
+                if newValue {
+                    try SMAppService.mainApp.register()
+                } else {
+                    try SMAppService.mainApp.unregister()
+                }
+            } catch {
+                NSLog("Oriel: launch-at-login change failed: \(error)")
+            }
+            objectWillChange.send()
+        }
+    }
+
+    var versionLabel: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "dev"
+        let build = (info?["CFBundleVersion"] as? String).map { " (\($0))" } ?? ""
+        return version + build
+    }
+
+    var shortcutsAreDefault: Bool {
+        ShortcutAction.allCases.allSatisfy { store.spec(for: $0) == $0.defaultSpec }
+    }
+
+    func binding<Value>(
+        _ get: @escaping () -> Value, _ set: @escaping (Value) -> Void
+    ) -> Binding<Value> {
+        Binding(get: get, set: set)
+    }
+}
+
 // MARK: - General pane
 
-final class GeneralPaneViewController: NSViewController {
-    private let updater: UpdaterController
+struct GeneralSettingsView: View {
+    @ObservedObject var model: SettingsModel
 
-    init(updater: UpdaterController) {
-        self.updater = updater
-        super.init(nibName: nil, bundle: nil)
-    }
+    var body: some View {
+        Form {
+            Section {
+                VStack(alignment: .leading, spacing: 3) {
+                    Toggle(
+                        L("Launch at login"),
+                        isOn: model.binding({ model.launchAtLogin }, { model.launchAtLogin = $0 })
+                    )
+                    .disabled(!model.isBundledApp)
+                    if !model.isBundledApp {
+                        Text(L("Available in the bundled app only (Scripts/bundle.sh)."))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
 
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) is not supported")
-    }
-
-    private lazy var launchAtLoginCheckbox = NSButton(
-        checkboxWithTitle: "Launch at login", target: self,
-        action: #selector(toggleLaunchAtLogin))
-
-    private lazy var hideMenuBarIconCheckbox = NSButton(
-        checkboxWithTitle: "Hide menu bar icon", target: self,
-        action: #selector(toggleHideMenuBarIcon))
-
-    /* SMAppService needs a real app bundle; a bare `swift run` binary has no
-       bundle identifier to register. */
-    private var isBundledApp: Bool {
-        Bundle.main.bundleIdentifier != nil
-    }
-
-    override func loadView() {
-        var views: [NSView] = [launchAtLoginCheckbox]
-        if isBundledApp {
-            launchAtLoginCheckbox.state = SMAppService.mainApp.status == .enabled ? .on : .off
-        } else {
-            launchAtLoginCheckbox.isEnabled = false
-            let note = NSTextField(
-                wrappingLabelWithString:
-                    "Available in the bundled app only (Scripts/bundle.sh).")
-            note.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
-            note.textColor = .secondaryLabelColor
-            views.append(note)
-        }
-
-        hideMenuBarIconCheckbox.state = AppPreferences.isMenuBarIconHidden ? .on : .off
-        views.append(hideMenuBarIconCheckbox)
-        let hideNote = NSTextField(
-            wrappingLabelWithString:
-                "While hidden, launch Oriel again to open Settings. "
-                + "The app appears in the Dock only while this window is open.")
-        hideNote.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
-        hideNote.textColor = .secondaryLabelColor
-        views.append(hideNote)
-
-        /* Updates. The menu bar icon (and its Check for Updates item) can be
-           hidden, so the settings window must offer the check too. */
-        let updateButton = updater.makeCheckButton()
-        views.append(updateButton)
-        let info = Bundle.main.infoDictionary
-        if let version = info?["CFBundleShortVersionString"] as? String {
-            let build = (info?["CFBundleVersion"] as? String).map { " (\($0))" } ?? ""
-            let versionNote = NSTextField(labelWithString: "Version \(version)\(build)")
-            versionNote.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
-            versionNote.textColor = .secondaryLabelColor
-            views.append(versionNote)
-        }
-
-        let stack = NSStackView(views: views)
-        stack.orientation = .vertical
-        stack.alignment = .leading
-        stack.spacing = 8
-        stack.setCustomSpacing(20, after: hideNote)
-        stack.translatesAutoresizingMaskIntoConstraints = false
-
-        let container = NSView()
-        container.addSubview(stack)
-        NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: container.safeAreaLayoutGuide.topAnchor, constant: 20),
-            stack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 24),
-            stack.trailingAnchor.constraint(lessThanOrEqualTo: container.trailingAnchor, constant: -24),
-        ])
-        view = container
-    }
-
-    @objc private func toggleHideMenuBarIcon() {
-        AppPreferences.isMenuBarIconHidden = hideMenuBarIconCheckbox.state == .on
-    }
-
-    @objc private func toggleLaunchAtLogin() {
-        do {
-            if launchAtLoginCheckbox.state == .on {
-                try SMAppService.mainApp.register()
-            } else {
-                try SMAppService.mainApp.unregister()
+                VStack(alignment: .leading, spacing: 3) {
+                    Toggle(
+                        L("Hide menu bar icon"),
+                        isOn: model.binding(
+                            { AppPreferences.isMenuBarIconHidden },
+                            { AppPreferences.isMenuBarIconHidden = $0 }))
+                    Text(
+                        L(
+                            "While hidden, launch Oriel again to open Settings. The app appears in the Dock only while this window is open."
+                        )
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                }
             }
-        } catch {
-            launchAtLoginCheckbox.state = launchAtLoginCheckbox.state == .on ? .off : .on
-            NSLog("Oriel: launch-at-login change failed: \(error)")
+
+            Section(L("Updates")) {
+                LabeledContent(L("Version"), value: model.versionLabel)
+                Button(L("Check for Updates…")) {
+                    model.updater.checkForUpdates()
+                }
+                .disabled(!model.updater.canCheckForUpdates)
+            }
         }
+        .formStyle(.grouped)
     }
 }
 
 // MARK: - Shortcuts pane
 
-final class ShortcutsPaneViewController: NSViewController {
-    private let store: ShortcutStore
-    private var recorderButtons: [ShortcutAction: ShortcutRecorderButton] = [:]
+struct ShortcutSettingsView: View {
+    @ObservedObject var model: SettingsModel
 
-    init(store: ShortcutStore) {
-        self.store = store
-        super.init(nibName: nil, bundle: nil)
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) is not supported")
-    }
-
-    override func loadView() {
-        let grid = NSGridView()
-        grid.rowSpacing = 10
-        grid.columnSpacing = 16
-        /* Labels and buttons have different intrinsic heights; align their
-           text baselines (the standard look for label + control rows). */
-        grid.rowAlignment = .firstBaseline
-
-        for action in ShortcutAction.allCases {
-            let label = NSTextField(labelWithString: action.title)
-            let button = ShortcutRecorderButton(spec: store.spec(for: action))
-            button.onChange = { [store] spec in
-                store.set(spec, for: action)
+    var body: some View {
+        Form {
+            Section {
+                ForEach(ShortcutAction.allCases, id: \.self) { action in
+                    LabeledContent(action.title) {
+                        ShortcutRecorder(spec: model.store.spec(for: action)) {
+                            model.store.set($0, for: action)
+                        }
+                        .fixedSize()
+                    }
+                }
+                Button(L("Reset to Defaults")) {
+                    ShortcutRecorderButton.cancelActiveRecording()
+                    model.store.resetAll()
+                }
+                .disabled(model.shortcutsAreDefault)
+            } header: {
+                Text(L("Global shortcuts"))
+            } footer: {
+                Text(L("Shortcuts act on the front window, in any app."))
             }
-            recorderButtons[action] = button
-            grid.addRow(with: [label, button])
         }
-        grid.column(at: 0).xPlacement = .trailing
+        .formStyle(.grouped)
+    }
+}
 
-        let resetButton = NSButton(
-            title: "Reset to Defaults", target: self, action: #selector(resetToDefaults))
+/* The AppKit recorder button, bridged: recording needs a local key-event
+   monitor and first-responder plumbing that SwiftUI has no vocabulary for. */
+private struct ShortcutRecorder: NSViewRepresentable {
+    /* Passed in by value: a representable whose inputs never change is
+       skipped by SwiftUI's updateNSView, so Reset to Defaults would leave
+       the buttons showing the old shortcuts. */
+    let spec: ShortcutSpec
+    let onChange: (ShortcutSpec) -> Void
 
-        let stack = NSStackView(views: [grid, resetButton])
-        stack.orientation = .vertical
-        stack.alignment = .centerX
-        stack.spacing = 16
-        stack.translatesAutoresizingMaskIntoConstraints = false
-
-        let container = NSView()
-        container.addSubview(stack)
-        NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: container.safeAreaLayoutGuide.topAnchor, constant: 20),
-            stack.centerXAnchor.constraint(equalTo: container.centerXAnchor),
-            stack.bottomAnchor.constraint(lessThanOrEqualTo: container.bottomAnchor, constant: -20),
-        ])
-        view = container
+    func makeNSView(context: Context) -> ShortcutRecorderButton {
+        let button = ShortcutRecorderButton(spec: spec)
+        button.onChange = onChange
+        return button
     }
 
-    @objc private func resetToDefaults() {
-        store.resetAll()
-        for (action, button) in recorderButtons {
-            button.spec = store.spec(for: action)
+    func updateNSView(_ button: ShortcutRecorderButton, context: Context) {
+        button.onChange = onChange
+        /* Never stomp the "Type shortcut…" prompt mid-recording. */
+        if !button.isRecording, button.spec != spec {
+            button.spec = spec
         }
     }
 }
@@ -455,7 +461,19 @@ final class ShortcutRecorderButton: NSButton {
     var onChange: ((ShortcutSpec) -> Void)?
 
     private var eventMonitor: Any?
-    private var isRecording = false
+    private var endObservers: [NSObjectProtocol] = []
+    private(set) var isRecording = false
+
+    /* One recording at a time, app-wide. Starting another recorder (or
+       resetting) ends the current one first, so the hotkeys suspended for
+       it come back before the next suspension, never after, and a reset
+       can't land behind the "Type shortcut…" prompt only to be painted
+       over with the old shortcut when the prompt is cancelled. */
+    private static weak var activeRecorder: ShortcutRecorderButton?
+
+    static func cancelActiveRecording() {
+        activeRecorder?.finishRecording(with: nil)
+    }
 
     init(spec: ShortcutSpec) {
         self.spec = spec
@@ -479,9 +497,24 @@ final class ShortcutRecorderButton: NSButton {
     }
 
     private func beginRecording() {
+        Self.cancelActiveRecording()
         isRecording = true
-        title = "Type shortcut…"
+        Self.activeRecorder = self
+        title = L("Type shortcut…")
         NotificationCenter.default.post(name: .shortcutRecordingBegan, object: self)
+
+        /* Closing Settings (the window is kept, so the button never leaves
+           it) or switching to another app would otherwise leave the hotkeys
+           suspended until the recorder is clicked again. */
+        let center = NotificationCenter.default
+        endObservers = [
+            center.addObserver(
+                forName: NSWindow.willCloseNotification, object: window, queue: .main
+            ) { [weak self] _ in self?.finishRecording(with: nil) },
+            center.addObserver(
+                forName: NSApplication.didResignActiveNotification, object: nil, queue: .main
+            ) { [weak self] _ in self?.finishRecording(with: nil) },
+        ]
 
         eventMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self else { return event }
@@ -510,7 +543,10 @@ final class ShortcutRecorderButton: NSButton {
             NSEvent.removeMonitor(eventMonitor)
             self.eventMonitor = nil
         }
+        endObservers.forEach(NotificationCenter.default.removeObserver)
+        endObservers = []
         isRecording = false
+        if Self.activeRecorder === self { Self.activeRecorder = nil }
         if let newSpec {
             spec = newSpec
             onChange?(newSpec)

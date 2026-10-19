@@ -4,6 +4,22 @@ All notable changes to Oriel are documented here. The release workflow publishes
 
 Keep each bullet on a single line: release notes render line breaks literally (both on GitHub and in the update dialog), so wrapped lines would break mid-sentence.
 
+## 1.5.0
+
+### Added
+
+- Oriel is available in Korean. The menu, Settings, and welcome window follow the macOS language.
+
+### Changed
+
+- Settings uses the system's grouped style, with section headers and rounded boxes like Xcode's settings.
+
+### Fixed
+
+- Shortcuts recorded while a Korean input source was on showed a Korean letter instead of the key.
+- Shortcuts using F1 through F20 showed a blank key.
+- Closing Settings or switching apps while recording a shortcut left every shortcut off until Settings was opened again.
+
 ## 1.4.4
 
 ### Changed
